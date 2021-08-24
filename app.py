@@ -23,9 +23,66 @@ def upload_file():
 
 
 # function to create the user table in the database
-def db_table_user():
-    # To be added later
-    x = 10
+def db_user_table():
+    conn = sqlite3.connect('be.db')
+    print("Opened database successfully")
+
+    conn.execute("CREATE TABLE IF NOT EXISTS user(userId INTEGER AUTOINCREMENT PRIMARY KEY,"
+                 "email TEXT NOT NULL,"
+                 "full_name TEXT NOT NULL,"
+                 "username TEXT NOT NULL,"
+                 "password TEXT NOT NULL,"
+                 "tag TEXT NOT NULL,"
+                 "is_active INTEGER NOT NULL)")
+    print("user table created successfully")
+    conn.close()
+
+
+def db_following_table():
+    conn = sqlite3.connect('be.db')
+    print("Opened database successfully")
+
+    conn.execute("CREATE TABLE IF NOT EXISTS follows(follows INTEGER AUTOINCREMENT PRIMARY KEY,"
+                 "followedId TEXT NOT NULL,"
+                 "followId TEXT NOT NULL,"
+                 "tag TEXT NOT NULL,"
+                 "FOREIGN KEY (followedId) REFERENCES user (userId)),"
+                 "FOREIGN KEY (followId) REFERENCES user (userId)))")
+    print("user table created successfully")
+    conn.close()
+
+
+def db_posts_table():
+    conn = sqlite3.connect('be.db')
+    print("Opened database successfully")
+
+    conn.execute("CREATE TABLE IF NOT EXISTS posts(postId INTEGER AUTOINCREMENT PRIMARY KEY,"
+                 "userId TEXT NOT NULL,"
+                 "text TEXT NOT NULL,"
+                 "is_retweet TEXT NOT NULL,"
+                 "image1 TEXT NULL,"
+                 "image2 TEXT NULL,"
+                 "image3 TEXT NULL,"
+                 "image4 TEXT NULL,"
+                 "likes INTEGER NOT NULL,"
+                 "retweets INTEGER NOT NULL,"
+                 "datetime TEXT NOT NULL,"
+                 "FOREIGN KEY (userId) REFERENCES user (userId)))")
+    print("user table created successfully")
+    conn.close()
+
+
+def db_likes_table():
+    conn = sqlite3.connect('be.db')
+    print("Opened database successfully")
+
+    conn.execute("CREATE TABLE IF NOT EXISTS likes(like INTEGER AUTOINCREMENT PRIMARY KEY,"
+                 "postId INT NOT NULL,"
+                 "userId INT NOT NULL,"
+                 "FOREIGN KEY (postId) REFERENCES posts (postId)),"
+                 "FOREIGN KEY (userId) REFERENCES user (userId)))")
+    print("user table created successfully")
+    conn.close()
 
 
 app = Flask(__name__)

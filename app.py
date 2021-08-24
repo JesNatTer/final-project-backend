@@ -1,4 +1,3 @@
-import hmac
 import sqlite3
 from flask import Flask, request, redirect
 from flask_cors import CORS
@@ -33,6 +32,7 @@ def db_user_table():
                  "username TEXT NOT NULL,"
                  "password TEXT NOT NULL,"
                  "tag TEXT NOT NULL,"
+                 "profile_image TEXT NOT NULL,"
                  "is_active INTEGER NOT NULL)")
     print("user table created successfully")
     conn.close()
@@ -46,8 +46,8 @@ def db_following_table():
                  "followedId TEXT NOT NULL,"
                  "followId TEXT NOT NULL,"
                  "tag TEXT NOT NULL,"
-                 "FOREIGN KEY (followedId) REFERENCES user (userId)),"
-                 "FOREIGN KEY (followId) REFERENCES user (userId)))")
+                 "FOREIGN KEY (followedId) REFERENCES user (userId),"
+                 "FOREIGN KEY (followId) REFERENCES user (userId))")
     print("user table created successfully")
     conn.close()
 
@@ -64,10 +64,8 @@ def db_posts_table():
                  "image2 TEXT NULL,"
                  "image3 TEXT NULL,"
                  "image4 TEXT NULL,"
-                 "likes INTEGER NOT NULL,"
-                 "retweets INTEGER NOT NULL,"
                  "datetime TEXT NOT NULL,"
-                 "FOREIGN KEY (userId) REFERENCES user (userId)))")
+                 "FOREIGN KEY (userId) REFERENCES user (userId))")
     print("user table created successfully")
     conn.close()
 
@@ -77,10 +75,38 @@ def db_likes_table():
     print("Opened database successfully")
 
     conn.execute("CREATE TABLE IF NOT EXISTS likes(like INTEGER AUTOINCREMENT PRIMARY KEY,"
+                 "liked_postId INT NOT NULL,"
+                 "userId INT NOT NULL,"
+                 "FOREIGN KEY (liked_postId) REFERENCES posts (postId),"
+                 "FOREIGN KEY (userId) REFERENCES user (userId))")
+    print("user table created successfully")
+    conn.close()
+
+
+def db_retweets_table():
+    conn = sqlite3.connect('be.db')
+    print("Opened database successfully")
+
+    conn.execute("CREATE TABLE IF NOT EXISTS retweets(retweet INTEGER AUTOINCREMENT PRIMARY KEY,"
+                 "retweeted_postId INT NOT NULL,"
+                 "userId INT NOT NULL,"
+                 "FOREIGN KEY (retweeted_postId) REFERENCES posts (postId),"
+                 "FOREIGN KEY (userId) REFERENCES user (userId))")
+    print("user table created successfully")
+    conn.close()
+
+
+def db_reply_table():
+    conn = sqlite3.connect('be.db')
+    print("Opened database successfully")
+
+    conn.execute("CREATE TABLE IF NOT EXISTS reply(replyId INTEGER AUTOINCREMENT PRIMARY KEY,"
                  "postId INT NOT NULL,"
                  "userId INT NOT NULL,"
-                 "FOREIGN KEY (postId) REFERENCES posts (postId)),"
-                 "FOREIGN KEY (userId) REFERENCES user (userId)))")
+                 "text TEXT NOT NULL,"
+                 "parentId INT NULL,"
+                 "FOREIGN KEY (postId) REFERENCES posts (postId),"
+                 "FOREIGN KEY (userId) REFERENCES user (userId))")
     print("user table created successfully")
     conn.close()
 

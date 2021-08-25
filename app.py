@@ -7,6 +7,99 @@ import cloudinary
 import cloudinary.uploader
 
 
+def dict_factory(cursor, row):
+    d = {}
+    for idx, col in enumerate(cursor.description):
+        d[col[0]] = row[idx]
+    return d
+
+
+class Database(object):
+    def __init__(self):
+        self.conn = sqlite3.connect('be.db')
+        self.conn.row_factory = dict_factory
+        self.cursor = self.conn.cursor()
+
+    def register(self, data):
+        values = data
+        put_data = {}
+        put_data['email'] = values.get('email')
+        put_data['full_name'] = values.get('full_name')
+        put_data['username'] = values.get('username')
+        put_data['password'] = values.get('password')
+        put_data['tag'] = values.get('tag')
+        put_data['profile_image'] = values.get('profile_image')
+        put_data['is_active'] = values.get('is_active')
+        if values.get("profile_image") is not None:
+            self.cursor.execute("INSERT INTO user("
+                                "email,"
+                                "full_name,"
+                                "username,"
+                                "password,"
+                                "tag,"
+                                "profile_image,"
+                                "is_active) VALUES(?, ?, ?)", (put_data['email'],
+                                                               put_data['full_name'],
+                                                               put_data['username'],
+                                                               put_data['password'],
+                                                               put_data['tag'],
+                                                               put_data['profile_image'],
+                                                               put_data['is_active']))
+        else:
+            self.cursor.execute("INSERT INTO user("
+                                "email,"
+                                "full_name,"
+                                "username,"
+                                "password,"
+                                "tag,"
+                                "is_active) VALUES(?, ?, ?)", (put_data['email'],
+                                                               put_data['full_name'],
+                                                               put_data['username'],
+                                                               put_data['password'],
+                                                               put_data['tag'],
+                                                               put_data['is_active']))
+
+    def login(self, email, password):
+        self.cursor.execute("SELECT * FROM user WHERE email=? AND password=?", (email, password,))
+        return self.cursor.fetchone()
+
+    def showallusers(self):
+        self.cursor.execute("SELECT * FROM user")
+        return self.cursor.fetchall()
+
+    def edituser(self, email, value):
+        email = email
+        values = value
+        query = "UPDATE user SET first_name=?, last_name=?, address=?, username=?, password=? WHERE email='" + email + "'"
+        self.cursor.execute(query, values)
+
+    def selectproduct(self, value):
+        proid = value
+        query = "SELECT * FROM catalogue WHERE product_id='" + proid + "'"
+        self.cursor.execute(query)
+        data = self.cursor.fetchall()
+        return data
+
+    def myproducts(self, value):
+        email = value
+        query = "SELECT * FROM catalogue WHERE email='" + email + "'"
+        self.cursor.execute(query)
+        data = self.cursor.fetchall()
+        return data
+
+    def viewcat(self):
+        self.cursor.execute("SELECT * FROM catalogue")
+        data = self.cursor.fetchall()
+        return data
+
+    def delete_user(self, email):
+        self.cursor.execute("DELETE FROM user WHERE email='" + email + "'")
+        self.conn.commit()
+
+    def commit(self):
+        return self.conn.commit()
+
+
 def upload_file():
     app.logger.info('in upload route')
     cloudinary.config(cloud_name ='dlqxdivje', api_key='599819111725767',
@@ -26,13 +119,13 @@ def db_user_table():
     conn = sqlite3.connect('be.db')
     print("Opened database successfully")
 
-    conn.execute("CREATE TABLE IF NOT EXISTS user(userId INTEGER AUTOINCREMENT PRIMARY KEY,"
+    conn.execute("CREATE TABLE IF NOT EXISTS user(userId INTEGER PRIMARY KEY AUTOINCREMENT,"
                  "email TEXT NOT NULL,"
                  "full_name TEXT NOT NULL,"
                  "username TEXT NOT NULL,"
                  "password TEXT NOT NULL,"
                  "tag TEXT NOT NULL,"
-                 "profile_image TEXT NOT NULL,"
+                 "profile_image TEXT,"
                  "is_active INTEGER NOT NULL)")
     print("user table created successfully")
     conn.close()
@@ -42,10 +135,9 @@ def db_following_table():
     conn = sqlite3.connect('be.db')
     print("Opened database successfully")
 
-    conn.execute("CREATE TABLE IF NOT EXISTS follows(follows INTEGER AUTOINCREMENT PRIMARY KEY,"
+    conn.execute("CREATE TABLE IF NOT EXISTS follows(follow INTEGER PRIMARY KEY AUTOINCREMENT,"
                  "followedId TEXT NOT NULL,"
                  "followId TEXT NOT NULL,"
-                 "tag TEXT NOT NULL,"
                  "FOREIGN KEY (followedId) REFERENCES user (userId),"
                  "FOREIGN KEY (followId) REFERENCES user (userId))")
     print("user table created successfully")
@@ -56,14 +148,14 @@ def db_posts_table():
     conn = sqlite3.connect('be.db')
     print("Opened database successfully")
 
-    conn.execute("CREATE TABLE IF NOT EXISTS posts(postId INTEGER AUTOINCREMENT PRIMARY KEY,"
+    conn.execute("CREATE TABLE IF NOT EXISTS posts(postId INTEGER PRIMARY KEY AUTOINCREMENT,"
                  "userId TEXT NOT NULL,"
-                 "text TEXT NOT NULL,"
-                 "is_retweet TEXT NOT NULL,"
-                 "image1 TEXT NULL,"
-                 "image2 TEXT NULL,"
-                 "image3 TEXT NULL,"
-                 "image4 TEXT NULL,"
+                 "text TEXT,"
+                 "retweeted_by TEXT,"
+                 "image1 TEXT,"
+                 "image2 TEXT,"
+                 "image3 TEXT,"
+                 "image4 TEXT,"
                  "datetime TEXT NOT NULL,"
                  "FOREIGN KEY (userId) REFERENCES user (userId))")
     print("user table created successfully")
@@ -74,7 +166,7 @@ def db_likes_table():
     conn = sqlite3.connect('be.db')
     print("Opened database successfully")
 
-    conn.execute("CREATE TABLE IF NOT EXISTS likes(like INTEGER AUTOINCREMENT PRIMARY KEY,"
+    conn.execute("CREATE TABLE IF NOT EXISTS likes(like INTEGER PRIMARY KEY AUTOINCREMENT,"
                  "liked_postId INT NOT NULL,"
                  "userId INT NOT NULL,"
                  "FOREIGN KEY (liked_postId) REFERENCES posts (postId),"
@@ -87,7 +179,7 @@ def db_retweets_table():
     conn = sqlite3.connect('be.db')
     print("Opened database successfully")
 
-    conn.execute("CREATE TABLE IF NOT EXISTS retweets(retweet INTEGER AUTOINCREMENT PRIMARY KEY,"
+    conn.execute("CREATE TABLE IF NOT EXISTS retweets(retweet INTEGER PRIMARY KEY AUTOINCREMENT,"
                  "retweeted_postId INT NOT NULL,"
                  "userId INT NOT NULL,"
                  "FOREIGN KEY (retweeted_postId) REFERENCES posts (postId),"
@@ -100,7 +192,7 @@ def db_reply_table():
     conn = sqlite3.connect('be.db')
     print("Opened database successfully")
 
-    conn.execute("CREATE TABLE IF NOT EXISTS reply(replyId INTEGER AUTOINCREMENT PRIMARY KEY,"
+    conn.execute("CREATE TABLE IF NOT EXISTS reply(replyId INTEGER PRIMARY KEY AUTOINCREMENT,"
                  "postId INT NOT NULL,"
                  "userId INT NOT NULL,"
                  "text TEXT NOT NULL,"
@@ -110,6 +202,13 @@ def db_reply_table():
     print("user table created successfully")
     conn.close()
 
+
+db_user_table()
+db_following_table()
+db_posts_table()
+db_likes_table()
+db_retweets_table()
+db_reply_table()
 
 app = Flask(__name__)
 CORS(app)
@@ -125,37 +224,36 @@ app.config['TESTING'] = True
 app.config['CORS_HEADERS'] = ['Content-Type']
 
 
-@app.route('/user-registration/', methods=["POST"])
-def user_registration():
+@app.route('/user/', methods=["POST", "GET", "PATCH"])
+def user_methods():
     response = {}
-    regex = '^(\w|\.|\_|\-)+[@](\w|\_|\-|\.)+[.]\w{2,3}$'
+    dtb = Database()
 
+    # Fetches ALL users
+    if request.method == "GET":
+        users = dtb.showallusers()
+        response['status_code'] = 200
+        response['data'] = users
+        return response
+
+    # LOGIN
+    if request.method == "PATCH":
+        email = request.json["email"]
+        password = request.json["password"]
+
+        user = dtb.login(email, password)
+
+        response['status_code'] = 200
+        response['data'] = user
+        return response
+
+    # REGISTER
     if request.method == "POST":
-
-        email = request.form['email']
-        first_name = request.form['first_name']
-        last_name = request.form['last_name']
-        address = request.form['address']
-        username = request.form['username']
-        password = request.form['password']
-        if (re.search(regex, email)):
-            with sqlite3.connect("posbe.db") as conn:
-                cursor = conn.cursor()
-                cursor.execute("INSERT INTO user("
-                               "email,"
-                               "first_name,"
-                               "last_name,"
-                               "address,"
-                               "username,"
-                               "password) VALUES(?, ?, ?, ?, ?, ?)", (email, first_name, last_name, address, username, password))
-                conn.commit()
-
-                response["message"] = "success. message sent"
-                response["status_code"] = 201
-
-                return response
-        else:
-            return "Email not valid. Please enter a valid email address"
+        incoming_data = dict(request.json)
+        dtb.register(incoming_data)
+        response["message"] = "Success"
+        response["status_code"] = 200
+        return response
 
 
 if __name__ == '__main__':

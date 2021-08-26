@@ -69,8 +69,12 @@ class Database(object):
             mail.send(msg)
 
     def login(self, email, password):
+        self.cursor.execute("UPDATE user SET is_active=? WHERE email=? AND password=?", (1, email, password,))
         self.cursor.execute("SELECT * FROM user WHERE email=? AND password=?", (email, password,))
+        self.conn.commit()
         return self.cursor.fetchone()
+
+    # def logout(self, userid):
 
     def show_all_users(self):
         self.cursor.execute("SELECT * FROM user")
@@ -127,9 +131,9 @@ class Database(object):
                                 (put_data['profile_image']))
             self.conn.commit()
 
-
-
-    # def delete_user()
+    def delete_user(self, userid):
+        self.cursor.execute("DELETE FROM user WHERE userId='" + str(userid) + "'")
+        self.conn.commit()
 
     def commit(self):
         return self.conn.commit()
@@ -311,6 +315,17 @@ def user_methods(userid):
             print('later')
         else:
             dtb.edit_user(userid, incoming_data, image)
+
+
+@app.route('/user/delete/<int:userid>/', methods=['GET'])
+def delete_user(userid):
+    response = {}
+    dtb = Database()
+    if request.method == 'GET':
+        dtb.delete_user(userid)
+        response['message'] = 'User deleted successfully'
+        response['status_code'] = 200
+        return response
 
 
 if __name__ == '__main__':

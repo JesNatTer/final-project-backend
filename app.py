@@ -5,6 +5,7 @@ from flask_mail import Mail, Message
 import re
 import cloudinary
 import cloudinary.uploader
+from datetime import datetime
 
 
 def dict_factory(cursor, row):
@@ -167,12 +168,12 @@ class Database(object):
         text = values
         images = images
         put_data = {}
-        put_data['userId'], = text.get('userId')
-        put_data['sourceId'], = text.get('sourceId')
+        put_data['userId'] = text.get('userId')
+        put_data['sourceId'] = text.get('sourceId')
         put_data['datetime'] = text.get('datetime')
-        if text.get('text') is not None:
+        if text.get('posttext') is not None:
             if images.get('image1') is None:
-                put_data["text"], = text.get('text')
+                put_data["text"] = text.get('posttext')
                 self.cursor.execute("INSERT INTO posts("
                                     "userId,"
                                     "sourceId,"
@@ -180,11 +181,11 @@ class Database(object):
                                     "datetime) VALUES(?, ?, ?, ?)", (put_data['userId'],
                                                                      put_data['sourceId'],
                                                                      put_data['text'],
-                                                                     put_data["datetime"]))
+                                                                     datetime.now()))
 
             elif images.get('image1') is not None:
                 # text with one image
-                put_data["text"], = text.get('text')
+                put_data["text"] = text.get('posttext')
                 put_data["image1"] = images.get('image1')
                 self.cursor.execute("INSERT INTO posts("
                                     "userId,"
@@ -195,12 +196,12 @@ class Database(object):
                                                                         put_data['sourceId'],
                                                                         put_data['text'],
                                                                         put_data['image1'],
-                                                                        put_data["datetime"]))
+                                                                        datetime.now()))
 
             elif (images.get('image1') is not None
                   and images.get('image2') is not None):
                 # text and two images
-                put_data["text"], = text.get('text')
+                put_data["text"] = text.get('posttext')
                 put_data["image1"] = images.get('image1')
                 put_data["image2"] = images.get('image2')
                 self.cursor.execute("INSERT INTO posts("
@@ -214,13 +215,13 @@ class Database(object):
                                                                            put_data['text'],
                                                                            put_data['image1'],
                                                                            put_data['image2'],
-                                                                           put_data["datetime"]))
+                                                                           datetime.now()))
 
             elif (images.get('image1') is not None
                   and images.get('image2') is not None
                   and images.get('image3') is not None):
                 # text with three images
-                put_data["text"], = text.get('text')
+                put_data["text"] = text.get('posttext')
                 put_data["image1"] = images.get('image1')
                 put_data["image2"] = images.get('image2')
                 put_data["image3"] = images.get('image3')
@@ -237,14 +238,14 @@ class Database(object):
                                                                               put_data['image1'],
                                                                               put_data['image2'],
                                                                               put_data['image3'],
-                                                                              put_data["datetime"]))
+                                                                              datetime.now()))
 
             elif (images.get('image1') is not None
                   and images.get('image2') is not None
                   and images.get('image3') is not None
                   and images.get('image4') is not None):
                 # text with four images
-                put_data["text"], = text.get('text')
+                put_data["text"] = text.get('posttext')
                 put_data["image1"] = images.get('image1')
                 put_data["image2"] = images.get('image2')
                 put_data["image3"] = images.get('image3')
@@ -264,7 +265,7 @@ class Database(object):
                                                                                  put_data['image2'],
                                                                                  put_data['image3'],
                                                                                  put_data['image4'],
-                                                                                 put_data["datetime"]))
+                                                                                 datetime.now()))
 
         elif images.get('image1') is not None:
             put_data["image1"] = images.get('image1')
@@ -275,7 +276,7 @@ class Database(object):
                                 "datetime) VALUES(?, ?, ?, ?)", (put_data['userId'],
                                                                  put_data['sourceId'],
                                                                  put_data['image1'],
-                                                                 put_data["datetime"]))
+                                                                 datetime.now()))
 
         elif (images.get('image1') is not None
               and images.get('image2') is not None):
@@ -292,7 +293,7 @@ class Database(object):
                                                                     put_data['sourceId'],
                                                                     put_data['image1'],
                                                                     put_data['image2'],
-                                                                    put_data["datetime"]))
+                                                                    datetime.now()))
 
         elif (images.get('image1') is not None
               and images.get('image2') is not None
@@ -311,7 +312,7 @@ class Database(object):
                                                                        put_data['image1'],
                                                                        put_data['image2'],
                                                                        put_data['image3'],
-                                                                       put_data["datetime"]))
+                                                                       datetime.now()))
 
         elif (images.get('image1') is not None
               and images.get('image2') is not None
@@ -328,13 +329,13 @@ class Database(object):
                                 "image2,"
                                 "image3,"
                                 "image4,"
-                                "datetime) VALUES(?, ?, ?, ?, ?, ?, ?)", (put_data['userId'],
+                                "datetime) VALUES(?, ?, ?, ?, ?, ?, cur)", (put_data['userId'],
                                                                           put_data['sourceId'],
                                                                           put_data['image1'],
                                                                           put_data['image2'],
                                                                           put_data['image3'],
                                                                           put_data['image4'],
-                                                                          put_data["datetime"]))
+                                                                          datetime.now()))
         else:
             return "you must have at least an image or text to post"
 
@@ -347,7 +348,7 @@ def image_convert():
     cloudinary.config(cloud_name ='dlqxdivje', api_key='599819111725767',
                       api_secret='lTD-aqaoTbzVgmZqyZxjPThyaVg')
     upload_result = None
-    if request.method == 'POST' or request.method == 'PUT':
+    if request.method == 'POST' or request.method == 'PUT' or request.method == "PATCH":
         profile_image = request.files['profile_image']
         app.logger.info('%s file_to_upload', profile_image)
         if profile_image:
@@ -555,6 +556,11 @@ def post_methods():
         images = dict(request.files)
         dtb.create_post(incoming_data, images)
         dtb.commit()
+
+        response['message'] = 'Post created'
+        response['status_code'] = 200
+
+        return response
 
 
 if __name__ == '__main__':

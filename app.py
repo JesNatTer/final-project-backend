@@ -91,49 +91,252 @@ class Database(object):
 
         if values.get('email') is not None:
             put_data['email'] = values.get('email')
-            self.cursor.execute("INSERT INTO user(email) VALUES(?) WHERE userId='" + str(userid) + "'",
+            self.cursor.execute("UPDATE user SET email=? WHERE userId='" + str(userid) + "'",
                                 (put_data['email']))
             self.conn.commit()
 
         if values.get('full_name') is not None:
             put_data['full_name'] = values.get('full_name')
-            self.cursor.execute("INSERT INTO user(full_name) VALUES(?) WHERE userId='" + str(userid) + "'",
+            self.cursor.execute("UPDATE user SET full_name=? WHERE userId='" + str(userid) + "'",
                                 (put_data['full_name']))
             self.conn.commit()
 
         if values.get('username') is not None:
             put_data['username'] = values.get('username')
-            self.cursor.execute("INSERT INTO user(username) VALUES(?) WHERE userId='" + str(userid) + "'",
+            self.cursor.execute("UPDATE user SET username=? WHERE userId='" + str(userid) + "'",
                                 (put_data['username']))
             self.conn.commit()
 
         if values.get('password') is not None:
             put_data['password'] = values.get('password')
-            self.cursor.execute("INSERT INTO user(password) VALUES(?) WHERE userId='" + str(userid) + "'",
+            self.cursor.execute("UPDATE user SET password=? WHERE userId='" + str(userid) + "'",
                                 (put_data['password']))
             self.conn.commit()
 
         if values.get('tag') is not None:
             put_data['tag'] = values.get('tag')
-            self.cursor.execute("INSERT INTO user(tag) VALUES(?) WHERE userId='" + str(userid) + "'",
+            self.cursor.execute("UPDATE user SET tag=? WHERE userId='" + str(userid) + "'",
                                 (put_data['tag']))
             self.conn.commit()
 
         if values.get('bio') is not None:
             put_data['bio'] = values.get('bio')
-            self.cursor.execute("INSERT INTO user(bio) VALUES(?) WHERE userId='" + str(userid) + "'",
-                                (put_data['bio']))
+            print(put_data['bio'])
+            self.cursor.execute("UPDATE user SET bio=? WHERE userId=?", (put_data['bio'], str(userid)))
             self.conn.commit()
 
         if pimage.get('profile_image') is not None:
             put_data['profile_image'] = pimage.get('profile_image')
-            self.cursor.execute("INSERT INTO user(profile_image) VALUES(?) WHERE userId='" + str(userid) + "'",
+            self.cursor.execute("UPDATE user SET profile_image=? WHERE userId='" + str(userid) + "'",
                                 (put_data['profile_image']))
             self.conn.commit()
 
     def delete_user(self, userid):
         self.cursor.execute("DELETE FROM user WHERE userId='" + str(userid) + "'")
         self.conn.commit()
+
+    def follow_user(self, userid1, userid2):
+        self.cursor.execute("SELECT * FROM user WHERE userId='" + str(userid2) + "'")
+        data = self.cursor.fetchone()
+
+        if data['following'] is not None:
+            followarray = list(map(int, data['following'].split(",")))
+            followarray.append(userid1)
+            followstring = str(followarray)
+            self.cursor.execute("UPDATE user SET following=? WHERE userId=?", (followstring, userid2))
+            self.conn.commit()
+
+        else:
+            self.cursor.execute("UPDATE user SET following=? WHERE userId=?", (userid1, userid2))
+            self.conn.commit()
+
+        self.cursor.execute("SELECT * FROM user WHERE userId='" + str(userid1) + "'")
+        data = self.cursor.fetchone()
+
+        if data['followers'] is not None:
+            followarray = list(map(int, data['followers'].split(",")))
+            followarray.append(userid2)
+            followstring = str(followarray)
+            self.cursor.execute("UPDATE user SET followers=? WHERE userId=?", (followstring, userid1))
+            self.conn.commit()
+        else:
+            self.cursor.execute("UPDATE user SET followers=? WHERE userId=?", (userid2, userid1))
+            self.conn.commit()
+
+    def create_post(self, values, images):
+        text = values
+        images = images
+        put_data = {}
+        put_data['userId'], = text.get('userId')
+        put_data['sourceId'], = text.get('sourceId')
+        put_data['datetime'] = text.get('datetime')
+        if text.get('text') is not None:
+            if images.get('image1') is None:
+                put_data["text"], = text.get('text')
+                self.cursor.execute("INSERT INTO posts("
+                                    "userId,"
+                                    "sourceId,"
+                                    "text,"
+                                    "datetime) VALUES(?, ?, ?, ?)", (put_data['userId'],
+                                                                     put_data['sourceId'],
+                                                                     put_data['text'],
+                                                                     put_data["datetime"]))
+
+            elif images.get('image1') is not None:
+                # text with one image
+                put_data["text"], = text.get('text')
+                put_data["image1"] = images.get('image1')
+                self.cursor.execute("INSERT INTO posts("
+                                    "userId,"
+                                    "sourceId,"
+                                    "text,"
+                                    "image1,"
+                                    "datetime) VALUES(?, ?, ?, ?, ?)", (put_data['userId'],
+                                                                        put_data['sourceId'],
+                                                                        put_data['text'],
+                                                                        put_data['image1'],
+                                                                        put_data["datetime"]))
+
+            elif (images.get('image1') is not None
+                  and images.get('image2') is not None):
+                # text and two images
+                put_data["text"], = text.get('text')
+                put_data["image1"] = images.get('image1')
+                put_data["image2"] = images.get('image2')
+                self.cursor.execute("INSERT INTO posts("
+                                    "userId,"
+                                    "sourceId,"
+                                    "text,"
+                                    "image1,"
+                                    "image2,"
+                                    "datetime) VALUES(?, ?, ?, ?, ?, ?)", (put_data['userId'],
+                                                                           put_data['sourceId'],
+                                                                           put_data['text'],
+                                                                           put_data['image1'],
+                                                                           put_data['image2'],
+                                                                           put_data["datetime"]))
+
+            elif (images.get('image1') is not None
+                  and images.get('image2') is not None
+                  and images.get('image3') is not None):
+                # text with three images
+                put_data["text"], = text.get('text')
+                put_data["image1"] = images.get('image1')
+                put_data["image2"] = images.get('image2')
+                put_data["image3"] = images.get('image3')
+                self.cursor.execute("INSERT INTO posts("
+                                    "userId,"
+                                    "sourceId,"
+                                    "text,"
+                                    "image1,"
+                                    "image2,"
+                                    "image3,"
+                                    "datetime) VALUES(?, ?, ?, ?, ?, ?, ?)", (put_data['userId'],
+                                                                              put_data['sourceId'],
+                                                                              put_data['text'],
+                                                                              put_data['image1'],
+                                                                              put_data['image2'],
+                                                                              put_data['image3'],
+                                                                              put_data["datetime"]))
+
+            elif (images.get('image1') is not None
+                  and images.get('image2') is not None
+                  and images.get('image3') is not None
+                  and images.get('image4') is not None):
+                # text with four images
+                put_data["text"], = text.get('text')
+                put_data["image1"] = images.get('image1')
+                put_data["image2"] = images.get('image2')
+                put_data["image3"] = images.get('image3')
+                put_data["image4"] = images.get('image4')
+                self.cursor.execute("INSERT INTO posts("
+                                    "userId,"
+                                    "sourceId,"
+                                    "text,"
+                                    "image1,"
+                                    "image2,"
+                                    "image3,"
+                                    "image4,"
+                                    "datetime) VALUES(?, ?, ?, ?, ?, ?, ?, ?)", (put_data['userId'],
+                                                                                 put_data['sourceId'],
+                                                                                 put_data['text'],
+                                                                                 put_data['image1'],
+                                                                                 put_data['image2'],
+                                                                                 put_data['image3'],
+                                                                                 put_data['image4'],
+                                                                                 put_data["datetime"]))
+
+        elif images.get('image1') is not None:
+            put_data["image1"] = images.get('image1')
+            self.cursor.execute("INSERT INTO posts("
+                                "userId,"
+                                "sourceId,"
+                                "image1,"
+                                "datetime) VALUES(?, ?, ?, ?)", (put_data['userId'],
+                                                                 put_data['sourceId'],
+                                                                 put_data['image1'],
+                                                                 put_data["datetime"]))
+
+        elif (images.get('image1') is not None
+              and images.get('image2') is not None):
+            put_data["image1"] = images.get('image1')
+            put_data["image2"] = images.get('image2')
+            put_data["image3"] = images.get('image3')
+            put_data["image4"] = images.get('image4')
+            self.cursor.execute("INSERT INTO posts("
+                                "userId,"
+                                "sourceId,"
+                                "image1,"
+                                "image2,"
+                                "datetime) VALUES(?, ?, ?, ?, ?)", (put_data['userId'],
+                                                                    put_data['sourceId'],
+                                                                    put_data['image1'],
+                                                                    put_data['image2'],
+                                                                    put_data["datetime"]))
+
+        elif (images.get('image1') is not None
+              and images.get('image2') is not None
+              and images.get('image3') is not None):
+            put_data["image1"] = images.get('image1')
+            put_data["image2"] = images.get('image2')
+            put_data["image3"] = images.get('image3')
+            self.cursor.execute("INSERT INTO posts("
+                                "userId,"
+                                "sourceId,"
+                                "image1,"
+                                "image2,"
+                                "image3,"
+                                "datetime) VALUES(?, ?, ?, ?, ?, ?)", (put_data['userId'],
+                                                                       put_data['sourceId'],
+                                                                       put_data['image1'],
+                                                                       put_data['image2'],
+                                                                       put_data['image3'],
+                                                                       put_data["datetime"]))
+
+        elif (images.get('image1') is not None
+              and images.get('image2') is not None
+              and images.get('image3') is not None
+              and images.get('image4') is not None):
+            put_data["image1"] = images.get('image1')
+            put_data["image2"] = images.get('image2')
+            put_data["image3"] = images.get('image3')
+            put_data["image4"] = images.get('image4')
+            self.cursor.execute("INSERT INTO posts("
+                                "userId,"
+                                "sourceId,"
+                                "image1,"
+                                "image2,"
+                                "image3,"
+                                "image4,"
+                                "datetime) VALUES(?, ?, ?, ?, ?, ?, ?)", (put_data['userId'],
+                                                                          put_data['sourceId'],
+                                                                          put_data['image1'],
+                                                                          put_data['image2'],
+                                                                          put_data['image3'],
+                                                                          put_data['image4'],
+                                                                          put_data["datetime"]))
+        else:
+            return "you must have at least an image or text to post"
 
     def commit(self):
         return self.conn.commit()
@@ -298,7 +501,7 @@ def users_methods():
         return response
 
 
-@app.route('/user/<int:userid>/', methods=['POST', 'GET'])
+@app.route('/user/<int:userid>/', methods=['PUT', 'GET'])
 def user_methods(userid):
     response = {}
     dtb = Database()
@@ -315,6 +518,9 @@ def user_methods(userid):
             print('later')
         else:
             dtb.edit_user(userid, incoming_data, image)
+        response['message'] = "User edited successfully"
+        response['status_code'] = 200
+        return response
 
 
 @app.route('/user/delete/<int:userid>/', methods=['GET'])
@@ -326,6 +532,29 @@ def delete_user(userid):
         response['message'] = 'User deleted successfully'
         response['status_code'] = 200
         return response
+
+
+@app.route('/user/follow/<int:userid1>/<int:userid2>/', methods=['PATCH'])
+def follow_user(userid1, userid2):
+    response = {}
+    dtb = Database()
+    if request.method == 'PATCH':
+        dtb.follow_user(userid1, userid2)
+        response['message'] = 'follow successful'
+        response['status_code'] = 200
+        return response
+
+
+@app.route('/post/', methods=["POST", "GET"])
+def post_methods():
+    response = {}
+    dtb = Database()
+    # if request.method == "GET":
+    if request.method == "POST":
+        incoming_data = dict(request.form)
+        images = dict(request.files)
+        dtb.create_post(incoming_data, images)
+        dtb.commit()
 
 
 if __name__ == '__main__':

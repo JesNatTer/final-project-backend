@@ -88,7 +88,9 @@ class Database(object):
         self.conn.commit()
         return self.cursor.fetchone()
 
-    # def logout(self, userid):
+    def logout(self, userid):
+        self.cursor.execute("UPDATE user SET is_active=? WHERE userId=?", (0, userid))
+        self.conn.commit()
 
     def show_all_users(self):
         self.cursor.execute("SELECT * FROM user")
@@ -182,7 +184,8 @@ class Database(object):
         data = self.cursor.fetchone()
         followarray = tuple(map(int, data['following'][1:len(data['following']) - 1].split(",")))
         print(followarray)
-        self.cursor.execute("SELECT * FROM posts WHERE userId IN " + str(followarray) + "")
+        self.cursor.execute("SELECT * FROM posts WHERE userId IN " + str(followarray)
+                            + " OR retweeted_by IN " + str(followarray) + "")
         return self.cursor.fetchall()
 
     def create_post(self, userid, values, images):
@@ -361,175 +364,24 @@ class Database(object):
         else:
             return "you must have at least an image or text to post"
 
-    def retweetpost(self, username, postid):
+    def retweet_post(self, userid, postid):
         self.cursor.execute("SELECT * FROM posts WHERE postId='" + str(postid) + "'")
         data = self.cursor.fetchone()
-        user_id = data['userId']
-        source_id = postid
-        retweetedby = username
-        time = data['datetime']
-        if data['text'] is not None:
-            if data['image1'] is None:
-                self.cursor.execute("INSERT INTO posts("
-                                    "userId,"
-                                    "sourceId,"
-                                    "retweeted_by,"
-                                    "text,"
-                                    "datetime) VALUES(?, ?, ?, ?, ?)", (user_id,
-                                                                        source_id,
-                                                                        retweetedby,
-                                                                        data['text'],
-                                                                        time))
 
-            elif (data['image1'] is not None
-                  and data['image2'] is not None
-                  and data['image3'] is not None
-                  and data['image4'] is not None):
-                # text with four images
-                self.cursor.execute("INSERT INTO posts("
-                                    "userId,"
-                                    "sourceId,"
-                                    "retweeted_by,"
-                                    "text,"
-                                    "image1,"
-                                    "image2,"
-                                    "image3,"
-                                    "image4,"
-                                    "datetime) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)", (user_id,
-                                                                                    source_id,
-                                                                                    retweetedby,
-                                                                                    data['text'],
-                                                                                    data['image1'],
-                                                                                    data['image2'],
-                                                                                    data['image3'],
-                                                                                    data['image4'],
-                                                                                    time))
+        if data['retweeted_by'] is not None:
+            retweetarray = list(map(int, (data['retweeted_by'][1:len(data['retweeted_by']) - 1]).split(",")))
+            retweetarray.append(userid)
+            retweetstring = str(retweetarray)
+            self.cursor.execute("UPDATE posts SET retweeted_by=? WHERE postId=?", (retweetstring, postid))
+            self.conn.commit()
 
-            elif (data['image1'] is not None
-                  and data['image2'] is not None
-                  and data['image3'] is not None):
-                # text with three images
-                self.cursor.execute("INSERT INTO posts("
-                                    "userId,"
-                                    "sourceId,"
-                                    "retweeted_by,"
-                                    "text,"
-                                    "image1,"
-                                    "image2,"
-                                    "image3,"
-                                    "datetime) VALUES(?, ?, ?, ?, ?, ?, ?, ?)", (user_id,
-                                                                                 source_id,
-                                                                                 retweetedby,
-                                                                                 data['text'],
-                                                                                 data['image1'],
-                                                                                 data['image2'],
-                                                                                 data['image3'],
-                                                                                 time))
-
-            elif (data['image1'] is not None
-                  and data['image2'] is not None):
-                # text and two images
-                self.cursor.execute("INSERT INTO posts("
-                                    "userId,"
-                                    "sourceId,"
-                                    "retweeted_by,"
-                                    "text,"
-                                    "image1,"
-                                    "image2,"
-                                    "datetime) VALUES(?, ?, ?, ?, ?, ?, ?)", (user_id,
-                                                                              source_id,
-                                                                              retweetedby,
-                                                                              data['text'],
-                                                                              data['image1'],
-                                                                              data['image2'],
-                                                                              time))
-
-            elif data['image1'] is not None:
-                # text with one image
-                self.cursor.execute("INSERT INTO posts("
-                                    "userId,"
-                                    "sourceId,"
-                                    "retweeted_by,"
-                                    "text,"
-                                    "image1,"
-                                    "datetime) VALUES(?, ?, ?, ?, ?, ?)", (user_id,
-                                                                           source_id,
-                                                                           retweetedby,
-                                                                           data['text'],
-                                                                           data['image1'],
-                                                                           time))
-
-        elif (data['image1'] is not None
-              and data['image2'] is not None
-              and data['image3'] is not None
-              and data['image4'] is not None):
-
-            self.cursor.execute("INSERT INTO posts("
-                                "userId,"
-                                "sourceId,"
-                                "retweeted_by,"
-                                "image1,"
-                                "image2,"
-                                "image3,"
-                                "image4,"
-                                "datetime) VALUES(?, ?, ?, ?, ?, ?, ?, ?)", (user_id,
-                                                                             source_id,
-                                                                             retweetedby,
-                                                                             data['image1'],
-                                                                             data['image2'],
-                                                                             data['image3'],
-                                                                             data['image4'],
-                                                                             time))
-
-        elif (data['image1'] is not None
-              and data['image2'] is not None
-              and data['image3'] is not None):
-            self.cursor.execute("INSERT INTO posts("
-                                "userId,"
-                                "sourceId,"
-                                "retweeted_by,"
-                                "image1,"
-                                "image2,"
-                                "image3,"
-                                "datetime) VALUES(?, ?, ?, ?, ?, ?, ?)", (user_id,
-                                                                          source_id,
-                                                                          retweetedby,
-                                                                          data['image1'],
-                                                                          data['image2'],
-                                                                          data['image3'],
-                                                                          time))
-
-        elif (data['image1'] is not None
-              and data['image2'] is not None):
-            self.cursor.execute("INSERT INTO posts("
-                                "userId,"
-                                "sourceId,"
-                                "retweeted_by,"
-                                "image1,"
-                                "image2,"
-                                "datetime) VALUES(?, ?, ?, ?, ?, ?)", (user_id,
-                                                                       source_id,
-                                                                       retweetedby,
-                                                                       data['image1'],
-                                                                       data['image2'],
-                                                                       time))
-
-        elif data['image1'] is not None:
-            self.cursor.execute("INSERT INTO posts("
-                                "userId,"
-                                "sourceId,"
-                                "retweeted_by,"
-                                "image1,"
-                                "datetime) VALUES(?, ?, ?, ?, ?)", (user_id,
-                                                                    source_id,
-                                                                    retweetedby,
-                                                                    data['image1'],
-                                                                    time))
+        else:
+            self.cursor.execute("UPDATE posts SET retweeted_by=? WHERE postId=?", (userid, postid))
+            self.conn.commit()
 
     def like_post(self, postid, userid):
         self.cursor.execute("SELECT * FROM posts WHERE postId='" + str(postid) + "'")
         data = self.cursor.fetchone()
-
         if data['liked_by'] is not None:
             likearray = list(map(int, (data['liked_by'][1:len(data['liked_by'])-1]).split(",")))
             likearray.append(userid)
@@ -540,6 +392,34 @@ class Database(object):
         else:
             self.cursor.execute("UPDATE posts SET liked_by=? WHERE postId=?", (userid, postid))
             self.conn.commit()
+
+    def reply(self, data):
+        put_data = {}
+        put_data['postId'] = data.get('postId')
+        put_data['userId'] = data.get('userId')
+        put_data['text'] = data.get('text')
+        if data.get('parentId') is not None:
+            put_data['parentId'] = data.get('parentId')
+            self.cursor.execute("INSERT into posts (postId, userId, text, parentId) VALUES (?, ?, ?, ?)",
+                                (put_data['postId'],
+                                 put_data['userId'],
+                                 put_data['text'],
+                                 put_data['parentId']))
+            self.conn.commit()
+        else:
+            self.cursor.execute("INSERT into posts (postId, userId, text) VALUES (?, ?, ?)",
+                                (put_data['postId'],
+                                 put_data['userId'],
+                                 put_data['text']))
+            self.conn.commit()
+
+    def view_reply(self):
+        self.cursor.execute("SELECT * FROM reply")
+        return self.cursor.fetchall()
+
+    def del_reply(self, replyid):
+        self.cursor.execute("DELETE FROM reply WHERE replyId='" + str(replyid) + "'")
+        self.conn.commit()
 
     def commit(self):
         return self.conn.commit()
@@ -579,26 +459,12 @@ def db_user_table():
     conn.close()
 
 
-def db_following_table():
-    conn = sqlite3.connect('be.db')
-    print("Opened database successfully")
-
-    conn.execute("CREATE TABLE IF NOT EXISTS follows(follow INTEGER PRIMARY KEY AUTOINCREMENT,"
-                 "followedId TEXT NOT NULL,"
-                 "followId TEXT NOT NULL,"
-                 "FOREIGN KEY (followedId) REFERENCES user (userId),"
-                 "FOREIGN KEY (followId) REFERENCES user (userId))")
-    print("user table created successfully")
-    conn.close()
-
-
 def db_posts_table():
     conn = sqlite3.connect('be.db')
     print("Opened database successfully")
 
     conn.execute("CREATE TABLE IF NOT EXISTS posts(postId INTEGER PRIMARY KEY AUTOINCREMENT,"
                  "userId TEXT NOT NULL,"
-                 "sourceId INTEGER NOT NULL,"
                  "text TEXT,"
                  "retweeted_by TEXT,"
                  "image1 TEXT,"
@@ -628,7 +494,6 @@ def db_reply_table():
 
 
 db_user_table()
-db_following_table()
 db_posts_table()
 db_reply_table()
 
@@ -743,12 +608,12 @@ def post_methods(userid):
         return response
 
 
-@app.route('/post/retweet/<username>/<int:postid>', methods=["POST"])
-def retweet(username, postid):
+@app.route('/post/retweet/<userid>/<int:postid>', methods=["POST"])
+def retweet(userid, postid):
     response = {}
     dtb = Database()
     if request.method == "POST":
-        dtb.retweetpost(username, postid)
+        dtb.retweet_post(userid, postid)
         dtb.commit()
 
         response['message'] = "Post shared"
@@ -764,6 +629,41 @@ def like(userid, postid):
     if request.method == "POST":
         dtb.like_post(postid, userid)
         response['message'] = "Post liked"
+        response['status_code'] = 200
+
+        return response
+
+
+@app.route('/post/reply/', methods=["POST, GET"])
+def post_reply():
+    response = {}
+    dtb = Database()
+    if request.method == "GET":
+        data = dtb.view_reply()
+
+        response['status_code'] = 200
+        response['data'] = data
+
+        return response
+
+    if request.method == "POST":
+        incoming_data = dict(request.form)
+        dtb.reply(incoming_data)
+
+        response['message'] = 'Reply sent'
+        response['status_code'] = 200
+
+        return response
+
+
+@app.route('/post/reply/delete/<replyid>', methods=['GET'])
+def delete_reply(replyid):
+    response = {}
+    dtb = Database()
+    if request.method == 'GET':
+        dtb.del_reply(replyid)
+
+        response['message'] = "Reply deleted"
         response['status_code'] = 200
 
         return response

@@ -15,6 +15,10 @@ def dict_factory(cursor, row):
     return d
 
 
+def time_now():
+    return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+
 class Database(object):
     def __init__(self):
         self.conn = sqlite3.connect('be.db')
@@ -195,6 +199,7 @@ class Database(object):
         put_data['userId'] = userid
         put_data['sourceId'] = text.get('sourceId')
         put_data['datetime'] = text.get('datetime')
+        put_data['create_post'] = text.get('create_post')
         if text.get('posttext') is not None:
             if images.get('image1') is None:
                 put_data["text"] = text.get('posttext')
@@ -202,10 +207,12 @@ class Database(object):
                                     "userId,"
                                     "sourceId,"
                                     "text,"
-                                    "datetime) VALUES(?, ?, ?, ?)", (put_data['userId'],
-                                                                     put_data['sourceId'],
-                                                                     put_data['text'],
-                                                                     datetime.now()))
+                                    "created_time,"
+                                    "datetime) VALUES(?, ?, ?, ?, ?)", (put_data['userId'],
+                                                                        put_data['sourceId'],
+                                                                        put_data['text'],
+                                                                        time_now(),
+                                                                        time_now()))
 
             elif (images.get('image1') is not None
                   and images.get('image2') is not None
@@ -225,14 +232,16 @@ class Database(object):
                                     "image2,"
                                     "image3,"
                                     "image4,"
-                                    "datetime) VALUES(?, ?, ?, ?, ?, ?, ?, ?)", (put_data['userId'],
-                                                                                 put_data['sourceId'],
-                                                                                 put_data['text'],
-                                                                                 self.image_convert_posts(put_data['image1']),
-                                                                                 self.image_convert_posts(put_data['image2']),
-                                                                                 self.image_convert_posts(put_data['image3']),
-                                                                                 self.image_convert_posts(put_data['image4']),
-                                                                                 datetime.now()))
+                                    "created_time,"
+                                    "datetime) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)", (put_data['userId'],
+                                                                                    put_data['sourceId'],
+                                                                                    put_data['text'],
+                                                                                    self.image_convert_posts(put_data['image1']),
+                                                                                    self.image_convert_posts(put_data['image2']),
+                                                                                    self.image_convert_posts(put_data['image3']),
+                                                                                    self.image_convert_posts(put_data['image4']),
+                                                                                    time_now(),
+                                                                                    time_now()))
 
             elif (images.get('image1') is not None
                   and images.get('image2') is not None
@@ -249,13 +258,15 @@ class Database(object):
                                     "image1,"
                                     "image2,"
                                     "image3,"
-                                    "datetime) VALUES(?, ?, ?, ?, ?, ?, ?)", (put_data['userId'],
-                                                                              put_data['sourceId'],
-                                                                              put_data['text'],
-                                                                              self.image_convert_posts(put_data['image1']),
-                                                                              self.image_convert_posts(put_data['image2']),
-                                                                              self.image_convert_posts(put_data['image3']),
-                                                                              datetime.now()))
+                                    "created_time,"
+                                    "datetime) VALUES(?, ?, ?, ?, ?, ?, ?, ?)", (put_data['userId'],
+                                                                                 put_data['sourceId'],
+                                                                                 put_data['text'],
+                                                                                 self.image_convert_posts(put_data['image1']),
+                                                                                 self.image_convert_posts(put_data['image2']),
+                                                                                 self.image_convert_posts(put_data['image3']),
+                                                                                 time_now(),
+                                                                                 time_now()))
 
             elif (images.get('image1') is not None
                   and images.get('image2') is not None):
@@ -269,12 +280,14 @@ class Database(object):
                                     "text,"
                                     "image1,"
                                     "image2,"
-                                    "datetime) VALUES(?, ?, ?, ?, ?, ?)", (put_data['userId'],
-                                                                           put_data['sourceId'],
-                                                                           put_data['text'],
-                                                                           self.image_convert_posts(put_data['image1']),
-                                                                           self.image_convert_posts(put_data['image2']),
-                                                                           datetime.now()))
+                                    "created_time,"
+                                    "datetime) VALUES(?, ?, ?, ?, ?, ?, ?)", (put_data['userId'],
+                                                                              put_data['sourceId'],
+                                                                              put_data['text'],
+                                                                              self.image_convert_posts(put_data['image1']),
+                                                                              self.image_convert_posts(put_data['image2']),
+                                                                              time_now(),
+                                                                              time_now()))
 
             elif images.get('image1') is not None:
                 # text with one image
@@ -285,11 +298,13 @@ class Database(object):
                                     "sourceId,"
                                     "text,"
                                     "image1,"
-                                    "datetime) VALUES(?, ?, ?, ?, ?)", (put_data['userId'],
-                                                                        put_data['sourceId'],
-                                                                        put_data['text'],
-                                                                        self.image_convert_posts(put_data['image1']),
-                                                                        datetime.now()))
+                                    "created_time,"
+                                    "datetime) VALUES(?, ?, ?, ?, ?, ?)", (put_data['userId'],
+                                                                           put_data['sourceId'],
+                                                                           put_data['text'],
+                                                                           self.image_convert_posts(put_data['image1']),
+                                                                           time_now(),
+                                                                           time_now()))
 
         elif (images.get('image1') is not None
               and images.get('image2') is not None
@@ -306,13 +321,15 @@ class Database(object):
                                 "image2,"
                                 "image3,"
                                 "image4,"
-                                "datetime) VALUES(?, ?, ?, ?, ?, ?, cur)", (put_data['userId'],
-                                                                            put_data['sourceId'],
-                                                                            self.image_convert_posts(put_data['image1']),
-                                                                            self.image_convert_posts(put_data['image2']),
-                                                                            self.image_convert_posts(put_data['image3']),
-                                                                            self.image_convert_posts(put_data['image4']),
-                                                                            datetime.now()))
+                                "created_time,"
+                                "datetime) VALUES(?, ?, ?, ?, ?, ?, ?, ?)", (put_data['userId'],
+                                                                             put_data['sourceId'],
+                                                                             self.image_convert_posts(put_data['image1']),
+                                                                             self.image_convert_posts(put_data['image2']),
+                                                                             self.image_convert_posts(put_data['image3']),
+                                                                             self.image_convert_posts(put_data['image4']),
+                                                                             time_now(),
+                                                                             time_now()))
 
         elif (images.get('image1') is not None
               and images.get('image2') is not None
@@ -326,29 +343,31 @@ class Database(object):
                                 "image1,"
                                 "image2,"
                                 "image3,"
-                                "datetime) VALUES(?, ?, ?, ?, ?, ?)", (put_data['userId'],
-                                                                       put_data['sourceId'],
-                                                                       self.image_convert_posts(put_data['image1']),
-                                                                       self.image_convert_posts(put_data['image2']),
-                                                                       self.image_convert_posts(put_data['image3']),
-                                                                       datetime.now()))
+                                "created_time,"
+                                "datetime) VALUES(?, ?, ?, ?, ?, ?, ?)", (put_data['userId'],
+                                                                          put_data['sourceId'],
+                                                                          self.image_convert_posts(put_data['image1']),
+                                                                          self.image_convert_posts(put_data['image2']),
+                                                                          self.image_convert_posts(put_data['image3']),
+                                                                          time_now(),
+                                                                          time_now()))
 
         elif (images.get('image1') is not None
               and images.get('image2') is not None):
             put_data["image1"] = images.get('image1')
             put_data["image2"] = images.get('image2')
-            put_data["image3"] = images.get('image3')
-            put_data["image4"] = images.get('image4')
             self.cursor.execute("INSERT INTO posts("
                                 "userId,"
                                 "sourceId,"
                                 "image1,"
                                 "image2,"
-                                "datetime) VALUES(?, ?, ?, ?, ?)", (put_data['userId'],
-                                                                    put_data['sourceId'],
-                                                                    self.image_convert_posts(put_data['image1']),
-                                                                    self.image_convert_posts(put_data['image2']),
-                                                                    datetime.now()))
+                                "created_time,"
+                                "datetime) VALUES(?, ?, ?, ?, ?, ?)", (put_data['userId'],
+                                                                       put_data['sourceId'],
+                                                                       self.image_convert_posts(put_data['image1']),
+                                                                       self.image_convert_posts(put_data['image2']),
+                                                                       time_now(),
+                                                                       time_now()))
 
         elif images.get('image1') is not None:
             put_data["image1"] = images.get('image1')
@@ -356,42 +375,225 @@ class Database(object):
                                 "userId,"
                                 "sourceId,"
                                 "image1,"
-                                "datetime) VALUES(?, ?, ?, ?)", (put_data['userId'],
-                                                                 put_data['sourceId'],
-                                                                 self.image_convert_posts(put_data['image1']),
-                                                                 datetime.now()))
+                                "created_time,"
+                                "datetime) VALUES(?, ?, ?, ?, ?)", (put_data['userId'],
+                                                                    put_data['sourceId'],
+                                                                    self.image_convert_posts(put_data['image1']),
+                                                                    time_now(),
+                                                                    time_now()))
 
         else:
             return "you must have at least an image or text to post"
 
-    def retweet_post(self, userid, postid):
+    def retweetpost(self, username, postid):
         self.cursor.execute("SELECT * FROM posts WHERE postId='" + str(postid) + "'")
         data = self.cursor.fetchone()
+        user_id = data['userId']
+        source_id = postid
+        retweetedby = username
+        time = data['datetime']
+        if data['text'] is not None:
+            if data['image1'] is None:
+                self.cursor.execute("INSERT INTO posts("
+                                    "userId,"
+                                    "sourceId,"
+                                    "retweeted_by,"
+                                    "text,"
+                                    "created_time,"
+                                    "datetime) VALUES(?, ?, ?, ?, ?, ?)", (user_id,
+                                                                           source_id,
+                                                                           retweetedby,
+                                                                           data['text'],
+                                                                           time_now(),
+                                                                           time))
 
-        if data['retweeted_by'] is not None:
-            retweetarray = list(map(int, (data['retweeted_by'][1:len(data['retweeted_by']) - 1]).split(",")))
-            retweetarray.append(userid)
-            retweetstring = str(retweetarray)
-            self.cursor.execute("UPDATE posts SET retweeted_by=? WHERE postId=?", (retweetstring, postid))
-            self.conn.commit()
+            elif (data['image1'] is not None
+                  and data['image2'] is not None
+                  and data['image3'] is not None
+                  and data['image4'] is not None):
+                # text with four images
+                self.cursor.execute("INSERT INTO posts("
+                                    "userId,"
+                                    "sourceId,"
+                                    "retweeted_by,"
+                                    "text,"
+                                    "image1,"
+                                    "image2,"
+                                    "image3,"
+                                    "image4,"
+                                    "created_time,"
+                                    "datetime) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (user_id,
+                                                                                       source_id,
+                                                                                       retweetedby,
+                                                                                       data['text'],
+                                                                                       data['image1'],
+                                                                                       data['image2'],
+                                                                                       data['image3'],
+                                                                                       data['image4'],
+                                                                                       time_now(),
+                                                                                       time))
 
-        else:
-            self.cursor.execute("UPDATE posts SET retweeted_by=? WHERE postId=?", (userid, postid))
-            self.conn.commit()
+            elif (data['image1'] is not None
+                  and data['image2'] is not None
+                  and data['image3'] is not None):
+                # text with three images
+                self.cursor.execute("INSERT INTO posts("
+                                    "userId,"
+                                    "sourceId,"
+                                    "retweeted_by,"
+                                    "text,"
+                                    "image1,"
+                                    "image2,"
+                                    "image3,"
+                                    "created_time,"
+                                    "datetime) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)", (user_id,
+                                                                                    source_id,
+                                                                                    retweetedby,
+                                                                                    data['text'],
+                                                                                    data['image1'],
+                                                                                    data['image2'],
+                                                                                    data['image3'],
+                                                                                    time_now(),
+                                                                                    time))
+
+            elif (data['image1'] is not None
+                  and data['image2'] is not None):
+                # text and two images
+                self.cursor.execute("INSERT INTO posts("
+                                    "userId,"
+                                    "sourceId,"
+                                    "retweeted_by,"
+                                    "text,"
+                                    "image1,"
+                                    "image2,"
+                                    "created_time,"
+                                    "datetime) VALUES(?, ?, ?, ?, ?, ?, ?, ?)", (user_id,
+                                                                                 source_id,
+                                                                                 retweetedby,
+                                                                                 data['text'],
+                                                                                 data['image1'],
+                                                                                 data['image2'],
+                                                                                 time_now(),
+                                                                                 time))
+
+            elif data['image1'] is not None:
+                # text with one image
+                self.cursor.execute("INSERT INTO posts("
+                                    "userId,"
+                                    "sourceId,"
+                                    "retweeted_by,"
+                                    "text,"
+                                    "image1,"
+                                    "created_time,"
+                                    "datetime) VALUES(?, ?, ?, ?, ?, ?, ?)", (user_id,
+                                                                              source_id,
+                                                                              retweetedby,
+                                                                              data['text'],
+                                                                              data['image1'],
+                                                                              time_now(),
+                                                                              time))
+
+        elif (data['image1'] is not None
+              and data['image2'] is not None
+              and data['image3'] is not None
+              and data['image4'] is not None):
+
+            self.cursor.execute("INSERT INTO posts("
+                                "userId,"
+                                "sourceId,"
+                                "retweeted_by,"
+                                "image1,"
+                                "image2,"
+                                "image3,"
+                                "image4,"
+                                "created_time,"
+                                "datetime) VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?)", (user_id,
+                                                                                source_id,
+                                                                                retweetedby,
+                                                                                data['image1'],
+                                                                                data['image2'],
+                                                                                data['image3'],
+                                                                                data['image4'],
+                                                                                time_now(),
+                                                                                time))
+
+        elif (data['image1'] is not None
+              and data['image2'] is not None
+              and data['image3'] is not None):
+            self.cursor.execute("INSERT INTO posts("
+                                "userId,"
+                                "sourceId,"
+                                "retweeted_by,"
+                                "image1,"
+                                "image2,"
+                                "image3,"
+                                "created_time,"
+                                "datetime) VALUES(?, ?, ?, ?, ?, ?, ?, ?)", (user_id,
+                                                                             source_id,
+                                                                             retweetedby,
+                                                                             data['image1'],
+                                                                             data['image2'],
+                                                                             data['image3'],
+                                                                             time_now(),
+                                                                             time))
+
+        elif (data['image1'] is not None
+              and data['image2'] is not None):
+            self.cursor.execute("INSERT INTO posts("
+                                "userId,"
+                                "sourceId,"
+                                "retweeted_by,"
+                                "image1,"
+                                "image2,"
+                                "created_time,"
+                                "datetime) VALUES(?, ?, ?, ?, ?, ?, ?)", (user_id,
+                                                                          source_id,
+                                                                          retweetedby,
+                                                                          data['image1'],
+                                                                          data['image2'],
+                                                                          time_now(),
+                                                                          time))
+
+        elif data['image1'] is not None:
+            self.cursor.execute("INSERT INTO posts("
+                                "userId,"
+                                "sourceId,"
+                                "retweeted_by,"
+                                "image1,"
+                                "created_time,"
+                                "datetime) VALUES(?, ?, ?, ?, ?, ?)", (user_id,
+                                                                       source_id,
+                                                                       retweetedby,
+                                                                       data['image1'],
+                                                                       time_now(),
+                                                                       time))
 
     def like_post(self, postid, userid):
         self.cursor.execute("SELECT * FROM posts WHERE postId='" + str(postid) + "'")
         data = self.cursor.fetchone()
-        if data['liked_by'] is not None:
-            likearray = list(map(int, (data['liked_by'][1:len(data['liked_by'])-1]).split(",")))
-            likearray.append(userid)
-            likearray = str(likearray)
-            self.cursor.execute("UPDATE posts SET liked_by=? WHERE postId=?", (likearray, postid))
-            self.conn.commit()
+        if data['sourceId'] != 0:
+            if data['liked_by'] is not None:
+                likearray = list(map(int, (data['liked_by'][1:len(data['liked_by'])-1]).split(",")))
+                likearray.append(userid)
+                likearray = str(likearray)
+                self.cursor.execute("UPDATE posts SET liked_by=? WHERE postId=? OR sourceId=?",
+                                    (likearray, data['sourceId'], data['sourceId']))
+                self.conn.commit()
+            else:
+                self.cursor.execute("UPDATE posts SET liked_by=? WHERE postId=? OR sourceId=?",
+                                    (userid, data['sourceId'], data['sourceId']))
+                self.conn.commit()
 
         else:
-            self.cursor.execute("UPDATE posts SET liked_by=? WHERE postId=?", (userid, postid))
-            self.conn.commit()
+            if data['liked_by'] is not None:
+                likearray = list(map(int, (data['liked_by'][1:len(data['liked_by']) - 1]).split(",")))
+                likearray.append(userid)
+                likearray = str(likearray)
+                self.cursor.execute("UPDATE posts SET liked_by=? WHERE postId=? OR sourceId=?", (likearray, postid, postid))
+                self.conn.commit()
+            else:
+                self.cursor.execute("UPDATE posts SET liked_by=? WHERE postId=? OR sourceId=?", (userid, postid, postid))
+                self.conn.commit()
 
     def reply(self, data):
         put_data = {}
@@ -471,6 +673,7 @@ def db_posts_table():
                  "image2 TEXT,"
                  "image3 TEXT,"
                  "image4 TEXT,"
+                 "created_time TEXT NOT NULL,"
                  "datetime TEXT NOT NULL,"
                  "liked_by TEXT NULL,"
                  "FOREIGN KEY (userId) REFERENCES user (userId))")
@@ -622,11 +825,12 @@ def retweet(userid, postid):
         return response
 
 
-@app.route('/post/like/<userid>/<int:postid>', methods=["POST"])
-def like(userid, postid):
+@app.route('/post/like/<int:postid>', methods=["PATCH"])
+def like(postid):
     response = {}
     dtb = Database()
-    if request.method == "POST":
+    if request.method == "PATCH":
+        userid = request.json('userId')
         dtb.like_post(postid, userid)
         response['message'] = "Post liked"
         response['status_code'] = 200

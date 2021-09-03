@@ -667,7 +667,7 @@ def image_convert():
                       api_secret='lTD-aqaoTbzVgmZqyZxjPThyaVg')
     upload_result = None
     if request.method == 'POST' or request.method == 'PUT' or request.method == "PATCH":
-        profile_image = request.json['profile_image']
+        profile_image = request.files['profile_image']
         app.logger.info('%s file_to_upload', profile_image)
         if profile_image:
             upload_result = cloudinary.uploader.upload(profile_image)
@@ -771,8 +771,8 @@ def users_methods():
         return response
 
     if request.method == "POST":
-        incoming_data = dict(request.json)
-        image = dict(request.json)
+        incoming_data = dict(request.form)
+        image = dict(request.files)
         dtb.register(incoming_data, image)
         dtb.commit()
         response["message"] = "Success"
@@ -791,8 +791,8 @@ def user_methods(userid):
         return response
 
     if request.method == 'PUT':
-        incoming_data = dict(request.json)
-        image = dict(request.json)
+        incoming_data = dict(request.form)
+        image = dict(request.files)
         if incoming_data.get('following') is not None:
             print('later')
         else:
@@ -835,8 +835,8 @@ def post_methods(userid):
         return response
 
     if request.method == "POST":
-        incoming_data = dict(request.json)
-        images = dict(request.json)
+        incoming_data = dict(request.form)
+        images = dict(request.files)
         dtb.create_post(userid, incoming_data, images)
         dtb.commit()
 
@@ -886,7 +886,7 @@ def post_reply():
         return response
 
     if request.method == "POST":
-        incoming_data = dict(request.json)
+        incoming_data = dict(request.form)
         dtb.reply(incoming_data)
 
         response['message'] = 'Reply sent'

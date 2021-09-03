@@ -158,12 +158,19 @@ class Database(object):
     def follow_user(self, userid1, userid2):
         self.cursor.execute("SELECT * FROM user WHERE userId='" + str(userid2) + "'")
         data = self.cursor.fetchone()
+        followingstring = data['following']
+        followerstring = data['followers']
 
-        if data['following'] is not None:
-            followarray = list(map(int, (data['following'][1:len(data['following'])-1]).split(",")))
-            followarray.append(userid1)
-            followstring = str(followarray)
-            self.cursor.execute("UPDATE user SET following=? WHERE userId=?", (followstring, userid2))
+        if followingstring is not None:
+            if len(list(data['following'])) != 1:
+                newfollowarray = list(map(int, followingstring[1:len(followingstring)-1].split(",")))
+
+            elif len(list(data['following'])) < 2:
+                newfollowarray = [int(followingstring)]
+
+            newfollowarray.append(userid1)
+            newfollowingstring = str(newfollowarray)
+            self.cursor.execute("UPDATE user SET following=? WHERE userId=?", (newfollowingstring, userid2))
             self.conn.commit()
 
         else:
@@ -174,10 +181,15 @@ class Database(object):
         data = self.cursor.fetchone()
 
         if data['followers'] is not None:
-            followarray = list(map(int, data['followers'[1:len(data['followers'])-1]].split(",")))
-            followarray.append(userid2)
-            followstring = str(followarray)
-            self.cursor.execute("UPDATE user SET followers=? WHERE userId=?", (followstring, userid1))
+            if len(list(data['followers'])) > 1:
+                newfollowerarray = list(map(int, followerstring[1:len(data['followers']) - 1].split(",")))
+
+            if len(list(data['followers'])) < 2:
+                newfollowerarray = [followerstring]
+
+            newfollowerarray.append(userid2)
+            newfollowerstring = str(newfollowerarray)
+            self.cursor.execute("UPDATE user SET followers=? WHERE userId=?", (newfollowerstring, userid1))
             self.conn.commit()
         else:
             self.cursor.execute("UPDATE user SET followers=? WHERE userId=?", (userid2, userid1))
@@ -385,12 +397,12 @@ class Database(object):
         else:
             return "you must have at least an image or text to post"
 
-    def retweetpost(self, username, postid):
+    def retweet_post(self, userid, postid):
         self.cursor.execute("SELECT * FROM posts WHERE postId='" + str(postid) + "'")
         data = self.cursor.fetchone()
         user_id = data['userId']
         source_id = postid
-        retweetedby = username
+        retweetedby = userid
         time = data['datetime']
         if data['text'] is not None:
             if data['image1'] is None:
@@ -615,6 +627,28 @@ class Database(object):
                                  put_data['text']))
             self.conn.commit()
 
+    def reply_to_reply(self, replyid, data):
+        self.cursor.execute("SELECT * FROM reply WHERE replyid='" + str(replyid) + "'")
+        parent = self.cursor.fetchone()
+        put_data = {}
+        put_data['postId'] = parent['postId']
+        put_data['userId'] = data.get('userId')
+        put_data['text'] = data.get('text')
+        if data.get('parentId') is not None:
+            put_data['parentId'] = parent('parentId')
+            self.cursor.execute("INSERT into posts (postId, userId, text, parentId) VALUES (?, ?, ?, ?)",
+                                (put_data['postId'],
+                                 put_data['userId'],
+                                 put_data['text'],
+                                 put_data['parentId']))
+            self.conn.commit()
+        else:
+            self.cursor.execute("INSERT into posts (postId, userId, text) VALUES (?, ?, ?)",
+                                (put_data['postId'],
+                                 put_data['userId'],
+                                 put_data['text']))
+            self.conn.commit()
+
     def view_reply(self):
         self.cursor.execute("SELECT * FROM reply")
         return self.cursor.fetchall()
@@ -633,7 +667,7 @@ def image_convert():
                       api_secret='lTD-aqaoTbzVgmZqyZxjPThyaVg')
     upload_result = None
     if request.method == 'POST' or request.method == 'PUT' or request.method == "PATCH":
-        profile_image = request.files['profile_image']
+        profile_image = request.json['profile_image']
         app.logger.info('%s file_to_upload', profile_image)
         if profile_image:
             upload_result = cloudinary.uploader.upload(profile_image)
@@ -668,6 +702,7 @@ def db_posts_table():
     conn.execute("CREATE TABLE IF NOT EXISTS posts(postId INTEGER PRIMARY KEY AUTOINCREMENT,"
                  "userId TEXT NOT NULL,"
                  "text TEXT,"
+                 "sourceId INTEGER NOT NULL,"
                  "retweeted_by TEXT,"
                  "image1 TEXT,"
                  "image2 TEXT,"
@@ -736,8 +771,8 @@ def users_methods():
         return response
 
     if request.method == "POST":
-        incoming_data = dict(request.form)
-        image = dict(request.files)
+        incoming_data = dict(request.json)
+        image = dict(request.json)
         dtb.register(incoming_data, image)
         dtb.commit()
         response["message"] = "Success"
@@ -756,8 +791,8 @@ def user_methods(userid):
         return response
 
     if request.method == 'PUT':
-        incoming_data = dict(request.form)
-        image = dict(request.files)
+        incoming_data = dict(request.json)
+        image = dict(request.json)
         if incoming_data.get('following') is not None:
             print('later')
         else:
@@ -800,8 +835,8 @@ def post_methods(userid):
         return response
 
     if request.method == "POST":
-        incoming_data = dict(request.form)
-        images = dict(request.files)
+        incoming_data = dict(request.json)
+        images = dict(request.json)
         dtb.create_post(userid, incoming_data, images)
         dtb.commit()
 
@@ -851,7 +886,7 @@ def post_reply():
         return response
 
     if request.method == "POST":
-        incoming_data = dict(request.form)
+        incoming_data = dict(request.json)
         dtb.reply(incoming_data)
 
         response['message'] = 'Reply sent'

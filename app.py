@@ -201,8 +201,8 @@ class Database(object):
         followarray = tuple(map(int, data['following'][1:len(data['following']) - 1].split(",")))
         print(followarray)
         self.cursor.execute("SELECT * FROM user INNER JOIN posts ON posts.userId = user.userId"
-                            " WHERE userId IN " + str(followarray)
-                            + " OR retweeted_by IN " + str(followarray) + "")
+                            " WHERE posts.userId IN " + str(followarray)
+                            + " OR posts.retweeted_by IN " + str(followarray) + "")
         return self.cursor.fetchall()
 
     def create_post(self, userid, values, images):

@@ -61,7 +61,7 @@ class Database(object):
                                                                            put_data['password'],
                                                                            put_data['tag'],
                                                                            image_convert(),
-                                                                           put_data['is_active']))
+                                                                           0))
             mail = Mail(app)
 
             msg = Message('Registration Successful', sender='lottoemail123@gmail.com', recipients=[put_data['email']])
@@ -79,7 +79,7 @@ class Database(object):
                                                                         put_data['username'],
                                                                         put_data['password'],
                                                                         put_data['tag'],
-                                                                        put_data['is_active']))
+                                                                        0))
             mail = Mail(app)
 
             msg = Message('Registration Successful', sender='lottoemail123@gmail.com', recipients=[put_data['email']])

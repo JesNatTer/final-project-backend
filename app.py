@@ -771,8 +771,8 @@ def users_methods():
         return response
 
     if request.method == "POST":
-        incoming_data = dict(request.form)
-        image = dict(request.files)
+        incoming_data = dict(request.json)
+        image = dict(request.json)
         dtb.register(incoming_data, image)
         dtb.commit()
         response["message"] = "Success"
@@ -791,7 +791,7 @@ def user_methods(userid):
         return response
 
     if request.method == 'PUT':
-        incoming_data = dict(request.form)
+        incoming_data = dict(request.json)
         image = dict(request.files)
         if incoming_data.get('following') is not None:
             print('later')
@@ -835,7 +835,7 @@ def post_methods(userid):
         return response
 
     if request.method == "POST":
-        incoming_data = dict(request.form)
+        incoming_data = dict(request.json)
         images = dict(request.files)
         dtb.create_post(userid, incoming_data, images)
         dtb.commit()
@@ -886,7 +886,7 @@ def post_reply():
         return response
 
     if request.method == "POST":
-        incoming_data = dict(request.form)
+        incoming_data = dict(request.json)
         dtb.reply(incoming_data)
 
         response['message'] = 'Reply sent'

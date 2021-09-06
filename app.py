@@ -200,7 +200,7 @@ class Database(object):
         data = self.cursor.fetchone()
         followarray = tuple(map(int, data['following'][1:len(data['following']) - 1].split(",")))
         print(followarray)
-        self.cursor.execute("SELECT * FROM posts INNER JOIN users ON users.userId = posts.userId"
+        self.cursor.execute("SELECT * FROM posts INNER JOIN user ON user.userId = posts.userId"
                             " WHERE userId IN " + str(followarray)
                             + " OR retweeted_by IN " + str(followarray) + "")
         return self.cursor.fetchall()

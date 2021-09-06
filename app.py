@@ -185,7 +185,7 @@ class Database(object):
                 newfollowerarray = list(map(int, followerstring[1:len(data['followers']) - 1].split(",")))
 
             if len(list(data['followers'])) < 2:
-                newfollowerarray = [followerstring]
+                newfollowerarray = [int(followerstring)]
 
             newfollowerarray.append(userid2)
             newfollowerstring = str(newfollowerarray)

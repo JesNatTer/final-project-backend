@@ -205,6 +205,10 @@ class Database(object):
                             + " OR posts.retweeted_by IN " + str(followarray) + "")
         return self.cursor.fetchall()
 
+    def view_all_posts(self):
+        self.cursor.execute("SELECT * FROM posts")
+        return self.cursor.fetchall()
+
     def create_post(self, userid, values, images):
         text = values
         images = images
@@ -840,9 +844,11 @@ def post_methods(userid):
         images = dict(request.json)
         dtb.create_post(userid, incoming_data, images)
         dtb.commit()
+        posts = dtb.view_all_posts()
 
         response['message'] = 'Post created'
         response['status_code'] = 200
+        response['all_posts'] = posts
 
         return response
 

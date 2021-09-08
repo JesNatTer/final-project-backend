@@ -195,6 +195,48 @@ class Database(object):
             self.cursor.execute("UPDATE user SET followers=? WHERE userId=?", (userid2, userid1))
             self.conn.commit()
 
+    def unfollow_user(self, userid1, userid2):
+        self.cursor.execute("SELECT * FROM user WHERE userId='" + str(userid2) + "'")
+        data = self.cursor.fetchone()
+        followingstring = data['following']
+        followerstring = data['followers']
+
+        if followingstring is not None:
+            if len(list(data['following'])) != 1:
+                newfollowarray = list(map(int, followingstring[1:len(followingstring)-1].split(",")))
+
+            elif len(list(data['following'])) < 2:
+                newfollowarray = [int(followingstring)]
+
+            newfollowarray.sort()
+            newfollowarray.remove(userid1)
+            newfollowingstring = str(newfollowarray)
+            self.cursor.execute("UPDATE user SET following=? WHERE userId=?", (newfollowingstring, userid2))
+            self.conn.commit()
+
+        else:
+            self.cursor.execute("UPDATE user SET following=? WHERE userId=?", (userid1, userid2))
+            self.conn.commit()
+
+        self.cursor.execute("SELECT * FROM user WHERE userId='" + str(userid1) + "'")
+        data = self.cursor.fetchone()
+
+        if data['followers'] is not None:
+            if len(list(data['followers'])) > 1:
+                newfollowerarray = list(map(int, followerstring[1:len(data['followers']) - 1].split(",")))
+
+            if len(list(data['followers'])) < 2:
+                newfollowerarray = [int(followerstring)]
+
+            newfollowerarray.sort()
+            newfollowerarray.append(userid2)
+            newfollowerstring = str(newfollowerarray)
+            self.cursor.execute("UPDATE user SET followers=? WHERE userId=?", (newfollowerstring, userid1))
+            self.conn.commit()
+        else:
+            self.cursor.execute("UPDATE user SET followers=? WHERE userId=?", (userid2, userid1))
+            self.conn.commit()
+
     def select_post(self, postid):
         self.cursor.execute("SELECT * FROM user INNER JOIN posts ON posts.userId = user.userId"
                             " WHERE posts.postId='" + str(postid) + "'")
@@ -608,13 +650,20 @@ class Database(object):
     def like_post(self, postid, userid):
         self.cursor.execute("SELECT * FROM posts WHERE postId='" + str(postid) + "'")
         data = self.cursor.fetchone()
+        likes_string = data['liked_by']
         if data['sourceId'] != 0:
             if data['liked_by'] is not None:
-                likearray = list(map(int, (data['liked_by'][1:len(data['liked_by'])-1]).split(",")))
+                if len(list(data['liked_by'])) != 1:
+                    likearray = list(map(int, (data['liked_by'][1:len(data['liked_by'])-1]).split(",")))
+
+                elif len(list(data['liked_by'])) < 2:
+                    likearray = [int(likes_string)]
+
+                likearray.sort()
                 likearray.append(userid)
-                likearray = str(likearray)
+                likestring = str(likearray)
                 self.cursor.execute("UPDATE posts SET liked_by=? WHERE postId=? OR sourceId=?",
-                                    (likearray, data['sourceId'], data['sourceId']))
+                                    (likestring, data['sourceId'], data['sourceId']))
                 self.conn.commit()
             else:
                 self.cursor.execute("UPDATE posts SET liked_by=? WHERE postId=? OR sourceId=?",
@@ -623,14 +672,59 @@ class Database(object):
 
         else:
             if data['liked_by'] is not None:
-                likearray = list(map(int, (data['liked_by'][1:len(data['liked_by']) - 1]).split(",")))
+                if len(list(data['liked_by'])) != 1:
+                    likearray = list(map(int, (data['liked_by'][1:len(data['liked_by'])-1]).split(",")))
+
+                elif len(list(data['liked_by'])) < 2:
+                    likearray = [int(likes_string)]
+
+                likearray.sort()
                 likearray.append(userid)
-                likearray = str(likearray)
-                self.cursor.execute("UPDATE posts SET liked_by=? WHERE postId=? OR sourceId=?", (likearray, postid, postid))
+                likestring = str(likearray)
+                self.cursor.execute("UPDATE posts SET liked_by=? WHERE postId=? OR sourceId=?", (likestring, postid, postid))
                 self.conn.commit()
             else:
                 self.cursor.execute("UPDATE posts SET liked_by=? WHERE postId=? OR sourceId=?", (userid, postid, postid))
                 self.conn.commit()
+
+    def unlike_post(self, postid, userid):
+        self.cursor.execute("SELECT * FROM posts WHERE postId='" + str(postid) + "'")
+        data = self.cursor.fetchone()
+        likes_string = data['liked_by']
+        if data['sourceId'] != 0:
+            if data['liked_by'] is not None:
+                if len(list(data['liked_by'])) != 1:
+                    likearray = list(map(int, (data['liked_by'][1:len(data['liked_by']) - 1]).split(",")))
+
+                elif len(list(data['liked_by'])) < 2:
+                    likearray = [int(likes_string)]
+
+                likearray.sort()
+                likearray.remove(userid)
+                likestring = str(likearray)
+                self.cursor.execute("UPDATE posts SET liked_by=? WHERE postId=? OR sourceId=?",
+                                    (likestring, data['sourceId'], data['sourceId']))
+                self.conn.commit()
+            else:
+                return 'cannot unlike post with no likes'
+
+        else:
+            if data['liked_by'] is not None:
+                if len(list(data['liked_by'])) != 1:
+                    likearray = list(map(int, (data['liked_by'][1:len(data['liked_by']) - 1]).split(",")))
+
+                elif len(list(data['liked_by'])) < 2:
+                    likearray = [int(likes_string)]
+
+                likearray.sort()
+                likearray.remove(userid)
+                likestring = str(likearray)
+                self.cursor.execute("UPDATE posts SET liked_by=? WHERE postId=? OR sourceId=?",
+                                    (likestring, postid, postid))
+                self.conn.commit()
+
+            else:
+                return 'cannot unlike post with no likes'
 
     def reply(self, data):
         put_data = {}
@@ -647,28 +741,6 @@ class Database(object):
             self.conn.commit()
         else:
             self.cursor.execute("INSERT into reply (postId, userId, text) VALUES (?, ?, ?)",
-                                (put_data['postId'],
-                                 put_data['userId'],
-                                 put_data['text']))
-            self.conn.commit()
-
-    def reply_to_reply(self, replyid, data):
-        self.cursor.execute("SELECT * FROM reply WHERE replyid='" + str(replyid) + "'")
-        parent = self.cursor.fetchone()
-        put_data = {}
-        put_data['postId'] = parent['postId']
-        put_data['userId'] = data.get('userId')
-        put_data['text'] = data.get('text')
-        if data.get('parentId') is not None:
-            put_data['parentId'] = parent('parentId')
-            self.cursor.execute("INSERT into posts (postId, userId, text, parentId) VALUES (?, ?, ?, ?)",
-                                (put_data['postId'],
-                                 put_data['userId'],
-                                 put_data['text'],
-                                 put_data['parentId']))
-            self.conn.commit()
-        else:
-            self.cursor.execute("INSERT into posts (postId, userId, text) VALUES (?, ?, ?)",
                                 (put_data['postId'],
                                  put_data['userId'],
                                  put_data['text']))
@@ -850,6 +922,17 @@ def follow_user(userid1, userid2):
         return response
 
 
+@app.route('/user/unfollow/<int:userid1>/<int:userid2>/', methods=['PATCH'])
+def unfollow_user(userid1, userid2):
+    response = {}
+    dtb = Database()
+    if request.method == 'PATCH':
+        dtb.unfollow_user(userid1, userid2)
+        response['message'] = 'unfollow successful'
+        response['status_code'] = 200
+        return response
+
+
 @app.route('/post/<int:userid>/', methods=["POST", "GET"])
 def post_methods(userid):
     response = {}
@@ -906,6 +989,19 @@ def like(postid):
     if request.method == "PATCH":
         userid = request.json('userId')
         dtb.like_post(postid, userid)
+        response['message'] = "Post unliked"
+        response['status_code'] = 200
+
+        return response
+
+
+@app.route('/post/unlike/<int:postid>', methods=["PATCH"])
+def unlike(postid):
+    response = {}
+    dtb = Database()
+    if request.method == "PATCH":
+        userid = request.json('userId')
+        dtb.unlike_post(postid, userid)
         response['message'] = "Post liked"
         response['status_code'] = 200
 

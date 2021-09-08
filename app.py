@@ -674,8 +674,9 @@ class Database(object):
                                  put_data['text']))
             self.conn.commit()
 
-    def view_reply(self):
-        self.cursor.execute("SELECT * FROM reply")
+    def view_reply(self, postId):
+        self.cursor.execute("SELECT * FROM reply INNER JOIN user ON user.userId = reply.userId"
+                            " WHERE reply.postId ='" + str(postId) + "'")
         return self.cursor.fetchall()
 
     def del_reply(self, replyid):
@@ -916,7 +917,8 @@ def post_reply():
     response = {}
     dtb = Database()
     if request.method == "GET":
-        data = dtb.view_reply()
+        postid = request.json('postid')
+        data = dtb.view_reply(postid)
 
         response['status_code'] = 200
         response['data'] = data

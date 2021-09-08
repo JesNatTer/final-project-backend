@@ -195,6 +195,11 @@ class Database(object):
             self.cursor.execute("UPDATE user SET followers=? WHERE userId=?", (userid2, userid1))
             self.conn.commit()
 
+    def select_post(self, postid):
+        self.cursor.execute("SELECT * FROM user INNER JOIN posts ON posts.userId = user.userId"
+                            " WHERE posts.postId='" + str(postid) + "'")
+        return self.cursor.fetchone()
+
     def view_posts(self, userid):
         self.cursor.execute("SELECT following FROM user WHERE userId='" + str(userid) + "'")
         data = self.cursor.fetchone()
@@ -218,21 +223,7 @@ class Database(object):
         put_data['datetime'] = text.get('datetime')
         put_data['create_post'] = text.get('create_post')
         if text.get('posttext') is not None:
-            if images.get('image1') is None:
-                put_data["text"] = text.get('posttext')
-                self.cursor.execute("INSERT INTO posts("
-                                    "userId,"
-                                    "sourceId,"
-                                    "text,"
-                                    "created_time,"
-                                    "datetime) VALUES(?, ?, ?, ?, ?)", (put_data['userId'],
-                                                                        put_data['sourceId'],
-                                                                        put_data['text'],
-                                                                        time_now(),
-                                                                        time_now()))
-                self.conn.commit()
-
-            elif (images.get('image1') is not None
+            if (images.get('image1') is not None
                   and images.get('image2') is not None
                   and images.get('image3') is not None
                   and images.get('image4') is not None):
@@ -326,6 +317,20 @@ class Database(object):
                                                                            self.image_convert_posts(put_data['image1']),
                                                                            time_now(),
                                                                            time_now()))
+                self.conn.commit()
+
+            elif images.get('image1') is None:
+                put_data["text"] = text.get('posttext')
+                self.cursor.execute("INSERT INTO posts("
+                                    "userId,"
+                                    "sourceId,"
+                                    "text,"
+                                    "created_time,"
+                                    "datetime) VALUES(?, ?, ?, ?, ?)", (put_data['userId'],
+                                                                        put_data['sourceId'],
+                                                                        put_data['text'],
+                                                                        time_now(),
+                                                                        time_now()))
                 self.conn.commit()
 
         elif (images.get('image1') is not None
@@ -859,6 +864,17 @@ def post_methods(userid):
         response['status_code'] = 200
         response['all_posts'] = posts
 
+        return response
+
+
+@app.route('/post/select/<int:postid>/', methods=["GET"])
+def post_select(postid):
+    response = {}
+    dtb = Database()
+    if request.method == "GET":
+        data = dtb.select_post(postid)
+        response['message'] = "Posts retrieved"
+        response['data'] = data
         return response
 
 

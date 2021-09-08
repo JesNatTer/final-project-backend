@@ -838,7 +838,7 @@ def follow_user(userid1, userid2):
         return response
 
 
-@app.route('/post/<userid>/', methods=["POST", "GET"])
+@app.route('/post/<int:userid>/', methods=["POST", "GET"])
 def post_methods(userid):
     response = {}
     dtb = Database()

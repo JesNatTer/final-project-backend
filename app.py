@@ -987,7 +987,7 @@ def like(postid):
     response = {}
     dtb = Database()
     if request.method == "PATCH":
-        userid = request.json('userId')
+        userid = request.json['userId']
         dtb.like_post(postid, userid)
         response['message'] = "Post unliked"
         response['status_code'] = 200
@@ -1000,7 +1000,7 @@ def unlike(postid):
     response = {}
     dtb = Database()
     if request.method == "PATCH":
-        userid = request.json('userId')
+        userid = request.json['userId']
         dtb.unlike_post(postid, userid)
         response['message'] = "Post liked"
         response['status_code'] = 200

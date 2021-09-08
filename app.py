@@ -659,6 +659,7 @@ class Database(object):
         self.conn.commit()
 
     def commit(self):
+        self.commit()
         return self.conn.commit()
 
 
@@ -837,7 +838,7 @@ def post_methods(userid):
 
     if request.method == "POST":
         incoming_data = dict(request.json)
-        images = dict(request.files)
+        images = dict(request.json)
         dtb.create_post(userid, incoming_data, images)
         dtb.commit()
 

@@ -912,12 +912,11 @@ def like(postid):
         return response
 
 
-@app.route('/post/reply/', methods=["POST, GET"])
-def post_reply():
+@app.route('/post/reply/<int:postid>', methods=["POST, GET"])
+def view_post_reply(postid):
     response = {}
     dtb = Database()
     if request.method == "GET":
-        postid = request.json('postid')
         data = dtb.view_reply(postid)
 
         response['status_code'] = 200
@@ -925,6 +924,11 @@ def post_reply():
 
         return response
 
+
+@app.route('/post/reply/', methods=["POST, GET"])
+def post_reply():
+    response = {}
+    dtb = Database()
     if request.method == "POST":
         incoming_data = dict(request.json)
         dtb.reply(incoming_data)

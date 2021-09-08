@@ -912,7 +912,7 @@ def like(postid):
         return response
 
 
-@app.route('/post/reply/<int:postid>', methods=["POST, GET"])
+@app.route('/post/reply/<int:postid>', methods=["GET"])
 def view_post_reply(postid):
     response = {}
     dtb = Database()

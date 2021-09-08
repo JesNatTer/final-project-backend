@@ -925,7 +925,7 @@ def view_post_reply(postid):
         return response
 
 
-@app.route('/post/reply/', methods=["POST, GET"])
+@app.route('/post/reply/', methods=["POST"])
 def post_reply():
     response = {}
     dtb = Database()

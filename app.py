@@ -203,12 +203,18 @@ class Database(object):
     def view_posts(self, userid):
         self.cursor.execute("SELECT following FROM user WHERE userId='" + str(userid) + "'")
         data = self.cursor.fetchone()
-        followarray = tuple(map(int, data['following'][1:len(data['following']) - 1].split(",")))
-        print(followarray)
-        self.cursor.execute("SELECT * FROM user INNER JOIN posts ON posts.userId = user.userId"
-                            " WHERE posts.userId IN " + str(followarray)
-                            + " OR posts.retweeted_by IN " + str(followarray) + "")
-        return self.cursor.fetchall()
+        if len(data['following']) == 1:
+            self.cursor.execute("SELECT * FROM user INNER JOIN posts ON posts.userId = user.userId"
+                                " WHERE posts.userId='" + str(data['following'])
+                                + "' OR posts.retweeted_by='" + str(data['following']) + "'")
+            return self.cursor.fetchall()
+        else:
+            followarray = tuple(map(int, data['following'][1:len(data['following']) - 1].split(",")))
+            print(followarray)
+            self.cursor.execute("SELECT * FROM user INNER JOIN posts ON posts.userId = user.userId"
+                                " WHERE posts.userId IN " + str(followarray)
+                                + " OR posts.retweeted_by IN " + str(followarray) + "")
+            return self.cursor.fetchall()
 
     def view_all_posts(self):
         self.cursor.execute("SELECT * FROM posts")

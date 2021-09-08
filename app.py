@@ -659,7 +659,6 @@ class Database(object):
         self.conn.commit()
 
     def commit(self):
-        self.commit()
         return self.conn.commit()
 
 

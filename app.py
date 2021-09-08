@@ -639,14 +639,14 @@ class Database(object):
         put_data['text'] = data.get('text')
         if data.get('parentId') is not None:
             put_data['parentId'] = data.get('parentId')
-            self.cursor.execute("INSERT into posts (postId, userId, text, parentId) VALUES (?, ?, ?, ?)",
+            self.cursor.execute("INSERT into reply (postId, userId, text, parentId) VALUES (?, ?, ?, ?)",
                                 (put_data['postId'],
                                  put_data['userId'],
                                  put_data['text'],
                                  put_data['parentId']))
             self.conn.commit()
         else:
-            self.cursor.execute("INSERT into posts (postId, userId, text) VALUES (?, ?, ?)",
+            self.cursor.execute("INSERT into reply (postId, userId, text) VALUES (?, ?, ?)",
                                 (put_data['postId'],
                                  put_data['userId'],
                                  put_data['text']))

@@ -230,6 +230,7 @@ class Database(object):
                                                                         put_data['text'],
                                                                         time_now(),
                                                                         time_now()))
+                self.conn.commit()
 
             elif (images.get('image1') is not None
                   and images.get('image2') is not None
@@ -259,6 +260,7 @@ class Database(object):
                                                                                     self.image_convert_posts(put_data['image4']),
                                                                                     time_now(),
                                                                                     time_now()))
+                self.conn.commit()
 
             elif (images.get('image1') is not None
                   and images.get('image2') is not None
@@ -284,6 +286,7 @@ class Database(object):
                                                                                  self.image_convert_posts(put_data['image3']),
                                                                                  time_now(),
                                                                                  time_now()))
+                self.conn.commit()
 
             elif (images.get('image1') is not None
                   and images.get('image2') is not None):
@@ -305,6 +308,7 @@ class Database(object):
                                                                               self.image_convert_posts(put_data['image2']),
                                                                               time_now(),
                                                                               time_now()))
+                self.conn.commit()
 
             elif images.get('image1') is not None:
                 # text with one image
@@ -322,6 +326,7 @@ class Database(object):
                                                                            self.image_convert_posts(put_data['image1']),
                                                                            time_now(),
                                                                            time_now()))
+                self.conn.commit()
 
         elif (images.get('image1') is not None
               and images.get('image2') is not None
@@ -347,6 +352,7 @@ class Database(object):
                                                                              self.image_convert_posts(put_data['image4']),
                                                                              time_now(),
                                                                              time_now()))
+            self.conn.commit()
 
         elif (images.get('image1') is not None
               and images.get('image2') is not None
@@ -368,6 +374,7 @@ class Database(object):
                                                                           self.image_convert_posts(put_data['image3']),
                                                                           time_now(),
                                                                           time_now()))
+            self.conn.commit()
 
         elif (images.get('image1') is not None
               and images.get('image2') is not None):
@@ -385,6 +392,7 @@ class Database(object):
                                                                        self.image_convert_posts(put_data['image2']),
                                                                        time_now(),
                                                                        time_now()))
+            self.conn.commit()
 
         elif images.get('image1') is not None:
             put_data["image1"] = images.get('image1')
@@ -398,6 +406,7 @@ class Database(object):
                                                                     self.image_convert_posts(put_data['image1']),
                                                                     time_now(),
                                                                     time_now()))
+            self.conn.commit()
 
         else:
             return "you must have at least an image or text to post"

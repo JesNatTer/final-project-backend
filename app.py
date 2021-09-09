@@ -207,7 +207,7 @@ class Database(object):
         if followingstring is not None:
             try:
                 test = int(followingstring)
-                self.cursor.execute("UPDATE user SET following=NULL WHERE userId=?", userid2)
+                self.cursor.execute("UPDATE user SET following=NULL WHERE userId=?", str(userid2))
                 self.conn.commit()
 
             except ValueError:
@@ -230,7 +230,7 @@ class Database(object):
             try:
                 # comment
                 test = int(data['followers'])
-                self.cursor.execute("UPDATE user SET following=NULL WHERE userId=?", userid1)
+                self.cursor.execute("UPDATE user SET following=NULL WHERE userId=?", str(userid1))
                 self.conn.commit()
 
             except ValueError:

@@ -669,7 +669,7 @@ class Database(object):
 
                 likearray.sort()
                 likearray.append(userid)
-                likestring = str(likearray)
+                likestring = str(list(map(str, likearray)))
                 self.cursor.execute("UPDATE posts SET liked_by=? WHERE postId=? OR sourceId=?",
                                     (likestring, data['sourceId'], data['sourceId']))
                 self.conn.commit()
@@ -696,7 +696,7 @@ class Database(object):
 
                 likearray.sort()
                 likearray.append(userid)
-                likestring = str(likearray)
+                likestring = str(list(map(str, likearray)))
                 self.cursor.execute("UPDATE posts SET liked_by=? WHERE postId=? OR sourceId=?", (likestring, postid, postid))
                 self.conn.commit()
             else:
@@ -714,7 +714,7 @@ class Database(object):
                     likearray = list(map(int, (data['liked_by'][1:len(data['liked_by']) - 1]).split(",")))
                     likearray.sort()
                     likearray.remove(userid)
-                    likestring = str(likearray)
+                    likestring = str(list(map(str, likearray)))
                     self.cursor.execute("UPDATE posts SET liked_by=? WHERE postId=? OR sourceId=?",
                                         (likestring, data['sourceId'], data['sourceId']))
                     self.conn.commit()
@@ -741,7 +741,7 @@ class Database(object):
                     likearray = list(map(int, (data['liked_by'][1:len(data['liked_by']) - 1]).split(",")))
                     likearray.sort()
                     likearray.remove(userid)
-                    likestring = str(likearray)
+                    likestring = str(list(map(str, likearray)))
                     self.cursor.execute("UPDATE posts SET liked_by=? WHERE postId=? OR sourceId=?",
                                         (likestring, postid, postid))
                     self.conn.commit()

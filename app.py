@@ -248,6 +248,7 @@ class Database(object):
         if len(data['following']) == 1:
             self.cursor.execute("SELECT * FROM user INNER JOIN posts ON posts.userId = user.userId"
                                 " WHERE posts.userId='" + str(data['following'])
+                                + "' OR posts.userId='" + str(userid)
                                 + "' OR posts.retweeted_by='" + str(data['following']) + "'")
             return self.cursor.fetchall()
         else:
@@ -672,7 +673,7 @@ class Database(object):
 
         else:
             if data['liked_by'] is not None:
-                if len(list(data['liked_by'])) != 1:
+                if len(list(data['liked_by'])) > 1:
                     likearray = list(map(int, (data['liked_by'][1:len(data['liked_by'])-1]).split(",")))
 
                 elif len(list(data['liked_by'])) < 2:
@@ -989,7 +990,7 @@ def like(postid):
     if request.method == "PATCH":
         userid = request.json['userId']
         dtb.like_post(postid, userid)
-        response['message'] = "Post unliked"
+        response['message'] = "Post liked"
         response['status_code'] = 200
 
         return response
@@ -1002,7 +1003,7 @@ def unlike(postid):
     if request.method == "PATCH":
         userid = request.json['userId']
         dtb.unlike_post(postid, userid)
-        response['message'] = "Post liked"
+        response['message'] = "Post unliked"
         response['status_code'] = 200
 
         return response

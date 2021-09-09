@@ -162,12 +162,13 @@ class Database(object):
         followerstring = data['followers']
 
         if followingstring is not None:
-            if len(list(data['following'])) != 1:
+            try:
+                test = int(followingstring)
+                newfollowarray = [int(followingstring)]
+            except ValueError:
                 newfollowarray = list(map(int, followingstring[1:len(followingstring)-1].split(",")))
 
-            elif len(list(data['following'])) < 2:
-                newfollowarray = [int(followingstring)]
-
+            newfollowarray.sort()
             newfollowarray.append(userid1)
             newfollowingstring = str(newfollowarray)
             self.cursor.execute("UPDATE user SET following=? WHERE userId=?", (newfollowingstring, userid2))
@@ -181,12 +182,14 @@ class Database(object):
         data = self.cursor.fetchone()
 
         if data['followers'] is not None:
-            if len(list(data['followers'])) > 1:
-                newfollowerarray = list(map(int, followerstring[1:len(data['followers']) - 1].split(",")))
-
-            if len(list(data['followers'])) < 2:
+            try:
+                test = int(followerstring)
                 newfollowerarray = [int(followerstring)]
 
+            except ValueError:
+                newfollowerarray = list(map(int, followerstring[1:len(data['followers']) - 1].split(",")))
+
+            newfollowerarray.sort()
             newfollowerarray.append(userid2)
             newfollowerstring = str(newfollowerarray)
             self.cursor.execute("UPDATE user SET followers=? WHERE userId=?", (newfollowerstring, userid1))
@@ -202,40 +205,40 @@ class Database(object):
         followerstring = data['followers']
 
         if followingstring is not None:
-            if len(list(data['following'])) != 1:
+            try:
+                test = int(followingstring)
+                self.cursor.execute("UPDATE user SET following=NULL WHERE userId=?", userid2)
+                self.conn.commit()
+
+            except ValueError:
                 newfollowarray = list(map(int, followingstring[1:len(followingstring)-1].split(",")))
-
-            elif len(list(data['following'])) < 2:
-                newfollowarray = [int(followingstring)]
-
-            newfollowarray.sort()
-            newfollowarray.remove(userid1)
-            newfollowingstring = str(newfollowarray)
-            self.cursor.execute("UPDATE user SET following=? WHERE userId=?", (newfollowingstring, userid2))
-            self.conn.commit()
+                newfollowarray.sort()
+                newfollowarray.remove(userid1)
+                newfollowingstring = str(newfollowarray)
+                self.cursor.execute("UPDATE user SET following=? WHERE userId=?", (newfollowingstring, userid2))
+                self.conn.commit()
 
         else:
-            self.cursor.execute("UPDATE user SET following=? WHERE userId=?", (userid1, userid2))
-            self.conn.commit()
+            return 'you are not following anyone'
 
         self.cursor.execute("SELECT * FROM user WHERE userId='" + str(userid1) + "'")
         data = self.cursor.fetchone()
 
         if data['followers'] is not None:
-            if len(list(data['followers'])) > 1:
+            try:
+                test = int(followerstring)
+                self.cursor.execute("UPDATE user SET following=NULL WHERE userId=?", userid1)
+                self.conn.commit()
+
+            except ValueError:
                 newfollowerarray = list(map(int, followerstring[1:len(data['followers']) - 1].split(",")))
-
-            if len(list(data['followers'])) < 2:
-                newfollowerarray = [int(followerstring)]
-
-            newfollowerarray.sort()
-            newfollowerarray.append(userid2)
-            newfollowerstring = str(newfollowerarray)
-            self.cursor.execute("UPDATE user SET followers=? WHERE userId=?", (newfollowerstring, userid1))
-            self.conn.commit()
+                newfollowerarray.sort()
+                newfollowerarray.remove(userid2)
+                newfollowerstring = str(newfollowerarray)
+                self.cursor.execute("UPDATE user SET followers=? WHERE userId=?", (newfollowerstring, userid1))
+                self.conn.commit()
         else:
-            self.cursor.execute("UPDATE user SET followers=? WHERE userId=?", (userid2, userid1))
-            self.conn.commit()
+            'User has no followers'
 
     def select_post(self, postid):
         self.cursor.execute("SELECT * FROM user INNER JOIN posts ON posts.userId = user.userId"
@@ -698,6 +701,7 @@ class Database(object):
 
                 likearray.sort()
                 likearray.append(userid)
+                print(likearray)
                 likestring = str(likearray)
                 self.cursor.execute("UPDATE posts SET liked_by=? WHERE postId=? OR sourceId=?", (likestring, postid, postid))
                 self.conn.commit()

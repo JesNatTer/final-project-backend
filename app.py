@@ -681,9 +681,17 @@ class Database(object):
         else:
             if data['liked_by'] is not None:
                 if len(list(data['liked_by'])) > 1:
+                    print(len(list(data['liked_by'])))
+                    print(list(data['liked_by']))
+                    print(data['liked_by'])
+                    print('route1')
                     likearray = list(map(int, (data['liked_by'][1:len(data['liked_by'])-1]).split(",")))
 
                 elif len(list(data['liked_by'])) < 2:
+                    print(len(list(data['liked_by'])))
+                    print(list(data['liked_by']))
+                    print(data['liked_by'])
+                    print('route2')
                     likearray = [int(likes_string)]
 
                 likearray.sort()
@@ -702,6 +710,7 @@ class Database(object):
         if data['sourceId'] != 0:
             if data['liked_by'] is not None:
                 if len(list(data['liked_by'])) > 1:
+                    print('route1')
                     likearray = list(map(int, (data['liked_by'][1:len(data['liked_by']) - 1]).split(",")))
                     likearray.sort()
                     likearray.remove(userid)
@@ -711,6 +720,10 @@ class Database(object):
                     self.conn.commit()
 
                 elif len(list(data['liked_by'])) < 2:
+                    print(len(list(data['liked_by'])))
+                    print(list(data['liked_by']))
+                    print(data['liked_by'])
+                    print('route2')
                     self.cursor.execute("UPDATE posts SET liked_by=NULL WHERE postId=? OR sourceId=?",
                                         (data['sourceId'], data['sourceId']))
                     self.conn.commit()
@@ -721,17 +734,26 @@ class Database(object):
         else:
             if data['liked_by'] is not None:
                 if len(list(data['liked_by'])) > 1:
+                    print(len(list(data['liked_by'])))
+                    print(list(data['liked_by']))
+                    print(data['liked_by'])
+                    print('route1')
                     likearray = list(map(int, (data['liked_by'][1:len(data['liked_by']) - 1]).split(",")))
+                    likearray.sort()
+                    likearray.remove(userid)
+                    likestring = str(likearray)
+                    self.cursor.execute("UPDATE posts SET liked_by=? WHERE postId=? OR sourceId=?",
+                                        (likestring, postid, postid))
+                    self.conn.commit()
 
                 elif len(list(data['liked_by'])) < 2:
-                    likearray = [int(likes_string)]
-
-                likearray.sort()
-                likearray.remove(userid)
-                likestring = str(likearray)
-                self.cursor.execute("UPDATE posts SET liked_by=? WHERE postId=? OR sourceId=?",
-                                    (likestring, postid, postid))
-                self.conn.commit()
+                    print(len(list(data['liked_by'])))
+                    print(list(data['liked_by']))
+                    print(data['liked_by'])
+                    print('route1')
+                    self.cursor.execute("UPDATE posts SET liked_by=NULL WHERE postId=? OR sourceId=?",
+                                        (postid, postid))
+                    self.conn.commit()
 
             else:
                 return 'cannot unlike post with no likes'

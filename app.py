@@ -211,7 +211,7 @@ class Database(object):
                 self.conn.commit()
 
             except ValueError:
-                newfollowarray = list(map(int, followingstring[1:len(followingstring)-1].split(",")))
+                newfollowarray = list(map(int, followingstring[1:len(followingstring)-1].split(", ")))
                 newfollowarray.sort()
                 newfollowarray.remove(userid1)
                 newfollowingstring = str(newfollowarray)
@@ -232,7 +232,7 @@ class Database(object):
                 self.conn.commit()
 
             except ValueError:
-                newfollowerarray = list(map(int, followerstring[1:len(data['followers']) - 1].split(",")))
+                newfollowerarray = list(map(int, followerstring[1:len(data['followers']) - 1].split(", ")))
                 newfollowerarray.sort()
                 newfollowerarray.remove(userid2)
                 newfollowerstring = str(newfollowerarray)

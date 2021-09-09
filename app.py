@@ -701,7 +701,7 @@ class Database(object):
         likes_string = data['liked_by']
         if data['sourceId'] != 0:
             if data['liked_by'] is not None:
-                if len(list(data['liked_by'])) != 1:
+                if len(list(data['liked_by'])) > 1:
                     likearray = list(map(int, (data['liked_by'][1:len(data['liked_by']) - 1]).split(",")))
 
                 elif len(list(data['liked_by'])) < 2:
@@ -718,7 +718,7 @@ class Database(object):
 
         else:
             if data['liked_by'] is not None:
-                if len(list(data['liked_by'])) != 1:
+                if len(list(data['liked_by'])) > 1:
                     likearray = list(map(int, (data['liked_by'][1:len(data['liked_by']) - 1]).split(",")))
 
                 elif len(list(data['liked_by'])) < 2:

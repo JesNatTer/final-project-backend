@@ -101,8 +101,9 @@ class Database(object):
         return self.cursor.fetchall()
 
     def select_user(self, userid):
-        self.cursor.execute("SELECT * FROM user WHERE userId='" + str(userid) + "'")
-        return self.cursor.fetchone()
+        self.cursor.execute("SELECT * FROM user INNER JOIN posts ON posts.userId = user.userId"
+                            " WHERE user.userId='" + str(userid) + "'")
+        return self.cursor.fetchall()
 
     def edit_user(self, userid, data, image):
         pimage = image

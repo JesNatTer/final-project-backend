@@ -101,8 +101,12 @@ class Database(object):
         return self.cursor.fetchall()
 
     def select_user(self, userid):
-        self.cursor.execute("SELECT * FROM user INNER JOIN posts ON posts.userId = user.userId"
-                            " WHERE user.userId='" + str(userid) + "'")
+        self.cursor.execute("SELECT * FROM user WHERE userId='" + str(userid) + "'")
+        return self.cursor.fetchone()
+
+    def select_user_posts(self, userid):
+        self.cursor.execute("SELECT * FROM posts WHERE userId='" + str(userid) + "'"
+                            " OR retweeted_by='" + str(userid) + "'")
         return self.cursor.fetchall()
 
     def edit_user(self, userid, data, image):
@@ -926,8 +930,10 @@ def user_methods(userid):
     dtb = Database()
     if request.method == 'GET':
         user = dtb.select_user(userid)
+        posts = dtb.select_user_posts(userid)
         response['message'] = "Retrieved successfully"
         response['data'] = user
+        response['posts'] = posts
         return response
 
     if request.method == 'PUT':

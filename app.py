@@ -228,7 +228,6 @@ class Database(object):
 
         if data['followers'] is not None:
             try:
-                # comment
                 test = int(data['followers'])
                 self.cursor.execute("UPDATE user SET following=NULL WHERE userId=?", str(userid1))
                 self.conn.commit()

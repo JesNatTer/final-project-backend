@@ -703,16 +703,18 @@ class Database(object):
             if data['liked_by'] is not None:
                 if len(list(data['liked_by'])) > 1:
                     likearray = list(map(int, (data['liked_by'][1:len(data['liked_by']) - 1]).split(",")))
+                    likearray.sort()
+                    likearray.remove(userid)
+                    likestring = str(likearray)
+                    self.cursor.execute("UPDATE posts SET liked_by=? WHERE postId=? OR sourceId=?",
+                                        (likestring, data['sourceId'], data['sourceId']))
+                    self.conn.commit()
 
                 elif len(list(data['liked_by'])) < 2:
-                    likearray = [int(likes_string)]
+                    self.cursor.execute("UPDATE posts SET liked_by=NULL WHERE postId=? OR sourceId=?",
+                                        (data['sourceId'], data['sourceId']))
+                    self.conn.commit()
 
-                likearray.sort()
-                likearray.remove(userid)
-                likestring = str(likearray)
-                self.cursor.execute("UPDATE posts SET liked_by=? WHERE postId=? OR sourceId=?",
-                                    (likestring, data['sourceId'], data['sourceId']))
-                self.conn.commit()
             else:
                 return 'cannot unlike post with no likes'
 

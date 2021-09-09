@@ -662,14 +662,14 @@ class Database(object):
         if data['sourceId'] != 0:
             if data['liked_by'] is not None:
                 if len(list(data['liked_by'])) != 1:
-                    likearray = list(map(int, (data['liked_by'][1:len(data['liked_by'])-1]).split(",")))
+                    likearray = list(map(int, (data['liked_by'][1:len(data['liked_by'])-1]).split(", ")))
 
                 elif len(list(data['liked_by'])) < 2:
                     likearray = [int(likes_string)]
 
                 likearray.sort()
                 likearray.append(userid)
-                likestring = str(list(map(str, likearray)))
+                likestring = str(likearray)
                 self.cursor.execute("UPDATE posts SET liked_by=? WHERE postId=? OR sourceId=?",
                                     (likestring, data['sourceId'], data['sourceId']))
                 self.conn.commit()
@@ -685,7 +685,7 @@ class Database(object):
                     print(list(data['liked_by']))
                     print(data['liked_by'])
                     print('route1')
-                    likearray = list(map(int, (data['liked_by'][1:len(data['liked_by'])-1]).split(",")))
+                    likearray = list(map(int, (data['liked_by'][1:len(data['liked_by'])-1]).split(", ")))
 
                 elif len(list(data['liked_by'])) < 2:
                     print(len(list(data['liked_by'])))
@@ -696,7 +696,7 @@ class Database(object):
 
                 likearray.sort()
                 likearray.append(userid)
-                likestring = str(list(map(str, likearray)))
+                likestring = str(likearray)
                 self.cursor.execute("UPDATE posts SET liked_by=? WHERE postId=? OR sourceId=?", (likestring, postid, postid))
                 self.conn.commit()
             else:
@@ -711,10 +711,10 @@ class Database(object):
             if data['liked_by'] is not None:
                 if len(list(data['liked_by'])) > 1:
                     print('route1')
-                    likearray = list(map(int, (data['liked_by'][1:len(data['liked_by']) - 1]).split(",")))
+                    likearray = list(map(int, (data['liked_by'][1:len(data['liked_by']) - 1]).split(", ")))
                     likearray.sort()
                     likearray.remove(userid)
-                    likestring = str(list(map(str, likearray)))
+                    likestring = str(likearray)
                     self.cursor.execute("UPDATE posts SET liked_by=? WHERE postId=? OR sourceId=?",
                                         (likestring, data['sourceId'], data['sourceId']))
                     self.conn.commit()
@@ -738,10 +738,10 @@ class Database(object):
                     print(list(data['liked_by']))
                     print(data['liked_by'])
                     print('route1')
-                    likearray = list(map(int, (data['liked_by'][1:len(data['liked_by']) - 1]).split(",")))
+                    likearray = list(map(int, (data['liked_by'][1:len(data['liked_by']) - 1]).split(", ")))
                     likearray.sort()
                     likearray.remove(userid)
-                    likestring = str(list(map(str, likearray)))
+                    likestring = str(likearray)
                     self.cursor.execute("UPDATE posts SET liked_by=? WHERE postId=? OR sourceId=?",
                                         (likestring, postid, postid))
                     self.conn.commit()

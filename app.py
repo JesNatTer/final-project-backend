@@ -661,12 +661,12 @@ class Database(object):
         likes_string = data['liked_by']
         if data['sourceId'] != 0:
             if data['liked_by'] is not None:
-                if int(data['liked_by']):
+                try:
+                    test = int(data['liked_by'])
                     likearray = [int(likes_string)]
 
-                else:
+                except ValueError:
                     likearray = list(map(int, (data['liked_by'][1:len(data['liked_by']) - 1]).split(", ")))
-                    likearray = [int(likes_string)]
 
                 likearray.sort()
                 likearray.append(userid)
@@ -681,14 +681,15 @@ class Database(object):
 
         else:
             if data['liked_by'] is not None:
-                if int(data['liked_by']):
+                try:
+                    test = int(data['liked_by'])
                     print(len(list(data['liked_by'])))
                     print(list(data['liked_by']))
                     print(data['liked_by'])
                     print('route1')
                     likearray = [int(likes_string)]
 
-                else:
+                except ValueError:
                     print(len(list(data['liked_by'])))
                     print(list(data['liked_by']))
                     print(data['liked_by'])
@@ -710,7 +711,8 @@ class Database(object):
         likes_string = data['liked_by']
         if data['sourceId'] != 0:
             if data['liked_by'] is not None:
-                if int(data['liked_by']):
+                try:
+                    test = int(data['liked_by'])
                     print(len(list(data['liked_by'])))
                     print(list(data['liked_by']))
                     print(data['liked_by'])
@@ -719,7 +721,7 @@ class Database(object):
                                         (data['sourceId'], data['sourceId']))
                     self.conn.commit()
 
-                else:
+                except ValueError:
                     print('route1')
                     likearray = list(map(int, (data['liked_by'][1:len(data['liked_by']) - 1]).split(", ")))
                     likearray.sort()
@@ -734,7 +736,8 @@ class Database(object):
 
         else:
             if data['liked_by'] is not None:
-                if int(data['liked_by']):
+                try:
+                    test = int(data['liked_by'])
                     print(len(list(data['liked_by'])))
                     print(list(data['liked_by']))
                     print(data['liked_by'])
@@ -742,7 +745,7 @@ class Database(object):
                     self.cursor.execute("UPDATE posts SET liked_by=NULL WHERE postId=? OR sourceId=?",
                                         (postid, postid))
                     self.conn.commit()
-                else:
+                except ValueError:
                     print(len(list(data['liked_by'])))
                     print(list(data['liked_by']))
                     print(data['liked_by'])

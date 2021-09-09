@@ -202,7 +202,7 @@ class Database(object):
         self.cursor.execute("SELECT * FROM user WHERE userId='" + str(userid2) + "'")
         data = self.cursor.fetchone()
         followingstring = data['following']
-        followerstring = data['followers']
+        print(followingstring)
 
         if followingstring is not None:
             try:
@@ -223,11 +223,13 @@ class Database(object):
 
         self.cursor.execute("SELECT * FROM user WHERE userId='" + str(userid1) + "'")
         data = self.cursor.fetchone()
+        followerstring = data['followers']
+        print(followerstring)
 
         if data['followers'] is not None:
             try:
                 # comment
-                test = int(followerstring)
+                test = int(data['followers'])
                 self.cursor.execute("UPDATE user SET following=NULL WHERE userId=?", userid1)
                 self.conn.commit()
 

@@ -229,7 +229,7 @@ class Database(object):
         if data['followers'] is not None:
             try:
                 test = int(data['followers'])
-                self.cursor.execute("UPDATE user SET following=NULL WHERE userId=?", str(userid1))
+                self.cursor.execute("UPDATE user SET followers=NULL WHERE userId=?", str(userid1))
                 self.conn.commit()
 
             except ValueError:

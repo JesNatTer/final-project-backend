@@ -157,6 +157,9 @@ class Database(object):
             self.conn.commit()
 
     def delete_user(self, userid):
+        self.cursor.execute("DELETE FROM posts WHERE userId='" + str(userid) +
+                            "' OR retweeted_by='" + str(userid) + "'")
+        self.conn.commit()
         self.cursor.execute("DELETE FROM user WHERE userId='" + str(userid) + "'")
         self.conn.commit()
 

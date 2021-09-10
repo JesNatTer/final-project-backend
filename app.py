@@ -117,31 +117,31 @@ class Database(object):
         if values.get('email') is not None:
             put_data['email'] = values.get('email')
             self.cursor.execute("UPDATE user SET email=? WHERE userId='" + str(userid) + "'",
-                                (put_data['email']))
+                                (put_data['email']),)
             self.conn.commit()
 
         if values.get('full_name') is not None:
             put_data['full_name'] = values.get('full_name')
             self.cursor.execute("UPDATE user SET full_name=? WHERE userId='" + str(userid) + "'",
-                                (put_data['full_name']))
+                                (put_data['full_name']),)
             self.conn.commit()
 
         if values.get('username') is not None:
             put_data['username'] = values.get('username')
             self.cursor.execute("UPDATE user SET username=? WHERE userId='" + str(userid) + "'",
-                                (put_data['username']))
+                                (put_data['username']),)
             self.conn.commit()
 
         if values.get('password') is not None:
             put_data['password'] = values.get('password')
             self.cursor.execute("UPDATE user SET password=? WHERE userId='" + str(userid) + "'",
-                                (put_data['password']))
+                                (put_data['password']),)
             self.conn.commit()
 
         if values.get('tag') is not None:
             put_data['tag'] = values.get('tag')
             self.cursor.execute("UPDATE user SET tag=? WHERE userId='" + str(userid) + "'",
-                                (put_data['tag']))
+                                (put_data['tag']),)
             self.conn.commit()
 
         if values.get('bio') is not None:
@@ -153,7 +153,7 @@ class Database(object):
         if pimage.get('profile_image') is not None:
             put_data['profile_image'] = pimage.get('profile_image')
             self.cursor.execute("UPDATE user SET profile_image=? WHERE userId='" + str(userid) + "'",
-                                (put_data['profile_image']))
+                                (self.image_convert_posts(put_data['profile_image'])),)
             self.conn.commit()
 
     def delete_user(self, userid):

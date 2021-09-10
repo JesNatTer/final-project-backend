@@ -277,6 +277,7 @@ class Database(object):
             return self.cursor.fetchall()
 
     def view_all_posts(self):
+        # random comment
         self.cursor.execute("SELECT * FROM posts")
         return self.cursor.fetchall()
 

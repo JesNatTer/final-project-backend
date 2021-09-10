@@ -147,13 +147,13 @@ class Database(object):
         if values.get('bio') is not None:
             put_data['bio'] = values.get('bio')
             print(put_data['bio'])
-            self.cursor.execute("UPDATE user SET bio=? WHERE userId=?", ([put_data['bio']], str(userid)))
+            self.cursor.execute("UPDATE user SET bio=? WHERE userId='" + str(userid) + "'", ([put_data['bio']]))
             self.conn.commit()
 
         if pimage.get('profile_image') is not None:
             put_data['profile_image'] = pimage.get('profile_image')
             self.cursor.execute("UPDATE user SET profile_image=? WHERE userId='" + str(userid) + "'",
-                                (self.image_convert_posts(put_data['profile_image'])),)
+                                ([put_data['profile_image']]))
             self.conn.commit()
 
     def delete_user(self, userid):

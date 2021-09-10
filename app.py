@@ -156,6 +156,7 @@ class Database(object):
                                 ([put_data['profile_image']]))
             self.conn.commit()
 
+    # something
     def delete_user(self, userid):
         self.cursor.execute("DELETE FROM posts WHERE userId='" + str(userid) +
                             "' OR retweeted_by='" + str(userid) + "'")

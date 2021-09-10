@@ -123,7 +123,7 @@ class Database(object):
         if values.get('full_name') is not None:
             put_data['full_name'] = values.get('full_name')
             self.cursor.execute("UPDATE user SET full_name=? WHERE userId='" + str(userid) + "'",
-                                (put_data['full_name']),)
+                                ([put_data['full_name']]))
             self.conn.commit()
 
         if values.get('username') is not None:
